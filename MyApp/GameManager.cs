@@ -3,6 +3,18 @@ using Microsoft.Data.Sqlite;
 
 public class GameManager
 {
+    private enum EGMActions
+    {
+        RACE = 0,
+        CAREER,
+        EXIT
+    };
+    private enum EGMCarrerActions
+    {
+        NEW = 0,
+        LOAD,
+        RETURN
+    };
     public List<Driver> driversList = new List<Driver>();
     public List<Team> teamsList = new List<Team>();
     public List<Motor> motorList = new List<Motor>();
@@ -25,11 +37,58 @@ public class GameManager
     public void GameLoop()
     {
         Init();
-        //while(true)
+        bool isRunning = true;
+        //while(isRunning)
         {
-            Console.WriteLine("Drivers size :" + driversList.Count);
-            for(int i = 0;i<driversList.Count;i++)
-                Console.WriteLine(driversList[i].ToString());
+ 
+            Console.WriteLine("Choose an actions !");
+            foreach(int action in Enum.GetValues(typeof(EGMActions)))
+                Console.WriteLine(action + " : " + ((EGMActions)action).ToString());
+            string? input = Console.ReadLine();
+            int inputConvert = MyAppLibrary.ConvertStringToInt(input);
+            
+            switch(inputConvert)
+            {
+                case (int)EGMActions.RACE:
+                    RaceHandler();
+                break;
+                case (int)EGMActions.CAREER:
+                    CarrerHandler();
+                break;
+                case (int)EGMActions.EXIT:
+                    isRunning = false;
+                    Console.WriteLine("Goodbye !");
+                break;
+                default:
+                    Console.WriteLine("Entry not recognize ! Please enter a number in a relation with the different options ! ");
+                    break;
+            }
         }
+    }
+
+    private void RaceHandler()
+    {
+        
+    }
+    private void CarrerHandler()
+    {
+        string? input = Console.ReadLine();
+        int inputConvert = MyAppLibrary.ConvertStringToInt(input);
+        switch(inputConvert)
+        {
+            case (int)EGMCarrerActions.NEW:
+                Console.WriteLine("TODO ");
+                break;
+            case (int)EGMCarrerActions.LOAD:
+                Console.WriteLine("TODO ");
+                break;
+            case (int)EGMCarrerActions.RETURN:
+                Console.WriteLine("TODO ");
+                break;
+            default:
+                Console.WriteLine("Entry not recognize ! Please enter a number in a relation with the different options ! ");
+                break;
+        }
+        Console.WriteLine("TODO ");
     }
 }
