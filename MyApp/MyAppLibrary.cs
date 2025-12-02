@@ -13,4 +13,21 @@ public static class MyAppLibrary
             return -1;
         }
     }
+
+    public static int GetIntInput()
+    {
+        string? input = Console.ReadLine();
+        int inputConvert = MyAppLibrary.ConvertStringToInt(input);
+        return inputConvert;
+    }
+
+    public static bool VerifyInput(int value,int min, int max, string errorText)
+    {
+        if(value < 0 || value > max )
+        {
+            Console.WriteLine(errorText);
+            return false;
+        }
+        return true;
+    }
 }

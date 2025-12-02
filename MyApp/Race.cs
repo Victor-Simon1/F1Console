@@ -10,6 +10,11 @@ public class  Race : Component
     public float Length{get;set;}
     public int IdType{get;set;}
 
+
+    public void StartRace()
+    {
+        
+    }
     public void LoadData(SqliteDataReader reader)
     {
         throw new NotImplementedException();
