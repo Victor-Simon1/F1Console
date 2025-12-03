@@ -10,7 +10,7 @@ public class Database
 
     public string CurrentDatabaseName = System.String.Empty;
     public string CurrentTableName = System.String.Empty;
-    public void LoadDatabase(GameManager gm)
+    public void LoadDatabase()
     {
         string connStringMFile = "Data Source=file:"+CurrentDatabaseName+";Mode=ReadWrite;";
         Console.WriteLine("Try to open : " + connStringMFile);
@@ -20,15 +20,15 @@ public class Database
             {
                 connection.Open();
                 Console.WriteLine("Database open ! ");
-                Console.WriteLine(connection.State);
-                LoadData<Driver>(gm.driversList);
-                //LoadData<Chassis>(gm.chassisList);
-                //LoadData<Motor>(gm.motorList);
-                //LoadData<Team>(gm.teamsList);
-                //LoadData<Race>(gm.raceList);
-                //LoadData<RaceType>(gm.raceTypeList);
-                //LoadData<TireBrand>(gm.tireList);
-                //LoadData<TireType>(gm.tireTypeList);
+                Console.WriteLine(connection.State);  
+                LoadData<Driver>(GameManager.instance.driversList);
+                //LoadData<Chassis>(GameManager.instance.chassisList);
+                //LoadData<Motor>(GameManager.instance.motorList);
+                //LoadData<Team>(GameManager.instance.teamsList);
+                //LoadData<Race>(GameManager.instance.raceList);
+                //LoadData<RaceType>(GameManager.instance.raceTypeList);
+                //LoadData<TireBrand>(GameManager.instance.tireList);
+                //LoadData<TireType>(GameManager.instance.tireTypeList);
                 
                 connection.Close();
             }
@@ -49,7 +49,6 @@ public class Database
             {
                 while(reader.Read()) 
                 {
-
                     T component = Activator.CreateInstance<T>();
                     if (component != null)
                     {
@@ -172,29 +171,35 @@ public class Database
             {
                 using (SqliteDataReader reader = command.ExecuteReader())
                 {
+                    Console.WriteLine("--------------------------------");
+                    Console.WriteLine(table);
                     if (!reader.HasRows)
                     {
                         Console.WriteLine("No rows found.");
                         return;
                     }
-
+                    int character = 0;
                     // Print column headers
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        Console.Write(reader.GetName(i) + "\t");
+                        string columnHeader = reader.GetName(i).PadRight(20);
+                        character += columnHeader.Length;
+                        Console.Write(columnHeader);
                     }
-                    Console.WriteLine("\n" + new string('-', 50));
+                   // Console.WriteLine(character);
+                    Console.WriteLine("\n" + new string('-', character));
                     // Print all rows
                     while (reader.Read())
                     {
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
-                            Console.Write(reader[i]?.ToString() + "\t");
+                            Console.Write(reader[i]?.ToString().PadRight(20) );
                         }
                         Console.WriteLine();
                     }
                 }
             }
+            Console.WriteLine("--------------------------------");
             connection.Close();
         }
         catch (SystemException ex)
@@ -202,11 +207,14 @@ public class Database
             //MessageBox.Show(string.Format("An error occurred: {0}", ex.Message));
         }
     }
-    private void AddDriver()
+    public void InsertRowInTable(string table,string columName, string row)
     {
         connection.Open();
-        string table = "";
-        string sql = "Insert into "+ table + " (name, score) values ('Me', 9001)";
+        row = row.Replace(",", "\",\"");
+        row = row.Replace("(", "(\"");
+        row = row.Replace(")", "\")");
+        string sql = "INSERT INTO "+ table +  " " + columName + " VALUES " + row;
+        Console.WriteLine("Line : " +sql);
         try
         {
             SqliteCommand command = new SqliteCommand(sql, connection);

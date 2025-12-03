@@ -8,6 +8,7 @@ public class  Race : Component
     public string? Name{get;set;}
     public string? Location{get;set;}
     public float Length{get;set;}
+    public int MaxTour{get;set;}
     public int IdType{get;set;}
 
 
