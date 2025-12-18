@@ -44,6 +44,9 @@ public class GameManager
         Console.WriteLine("Init database");
         database = new Database();
        // db.LoadDatabase(this);
+
+       //Set Driver Coeff
+       Driver.SetCoeff();
     }
 
 
@@ -54,6 +57,7 @@ public class GameManager
         while(isRunning)
         {
             Console.WriteLine("Choose an actions !");
+            database.ClearDatabase();
             foreach(int action in Enum.GetValues(typeof(EGMActions)))
                 Console.WriteLine(action + " : " + ((EGMActions)action).ToString());
             string? input = Console.ReadLine();
@@ -67,7 +71,6 @@ public class GameManager
                 break;
                 case (int)EGMActions.CAREER:
                     CarrerHandler carrerHandler = new CarrerHandler();
-                    carrerHandler.SelectMode();
                     carrerHandler.Start();
                 break; 
                 case (int)EGMActions.DATABASE:
@@ -94,6 +97,8 @@ public class GameManager
                     {
                         database.ShowTable(tableName);
                     }
+                    SaveSystem.SaveListToJson();
+                    SaveSystem.LoadFromJson();
                     break;
                 case (int)EGMActions.EXIT:
                     isRunning = false;

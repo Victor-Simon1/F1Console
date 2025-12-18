@@ -2,17 +2,20 @@ using Microsoft.Data.Sqlite;
 
 public class  Chassis : Component
 {
-    public static string READDB => throw new NotImplementedException();
+    public static string READDB => "SELECT * FROM chassis";
 
     public int Id{get;set;}
     public string? Name{get;set;}
     public int Aero{get;set;}
-
+    public int Stability{get;set;}
     public void LoadData(SqliteDataReader reader)
     {
-        throw new NotImplementedException();
+        Id = reader.GetInt32(0);
+        Name = reader.GetString(1);
+        Aero = reader.GetInt32(2);
+        Stability = reader.GetInt32(3);
     }
-
+    public float GetGeneral() => (Aero + Stability)/2f;
     public override string ToString()
     {
         throw new NotImplementedException();

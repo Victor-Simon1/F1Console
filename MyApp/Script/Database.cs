@@ -10,6 +10,15 @@ public class Database
 
     public string CurrentDatabaseName = System.String.Empty;
     public string CurrentTableName = System.String.Empty;
+
+    public void ClearDatabase()
+    {
+        GameManager.instance.driversList.Clear();
+        GameManager.instance.teamsList.Clear();
+        GameManager.instance.raceList.Clear();
+        GameManager.instance.motorList.Clear();
+        GameManager.instance.chassisList.Clear();
+    }
     public void LoadDatabase()
     {
         string connStringMFile = "Data Source=file:"+CurrentDatabaseName+";Mode=ReadWrite;";
@@ -22,10 +31,10 @@ public class Database
                 Console.WriteLine("Database open ! ");
                 Console.WriteLine(connection.State);  
                 LoadData<Driver>(GameManager.instance.driversList);
-                //LoadData<Chassis>(GameManager.instance.chassisList);
-                //LoadData<Motor>(GameManager.instance.motorList);
-                //LoadData<Team>(GameManager.instance.teamsList);
-                //LoadData<Race>(GameManager.instance.raceList);
+                LoadData<Chassis>(GameManager.instance.chassisList);
+                LoadData<Motor>(GameManager.instance.motorList);
+                LoadData<Team>(GameManager.instance.teamsList);
+                LoadData<Race>(GameManager.instance.raceList);
                 //LoadData<RaceType>(GameManager.instance.raceTypeList);
                 //LoadData<TireBrand>(GameManager.instance.tireList);
                 //LoadData<TireType>(GameManager.instance.tireTypeList);
@@ -35,7 +44,7 @@ public class Database
            
         }
         catch (SqliteException ex) { 
-            Console.WriteLine("Try to open : " + connStringMFile);
+            //Console.WriteLine("Try to open : " + connStringMFile);
             Console.WriteLine(ex.Message);
         }
     }

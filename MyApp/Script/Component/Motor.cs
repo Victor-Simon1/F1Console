@@ -2,7 +2,7 @@ using Microsoft.Data.Sqlite;
 
 public class Motor : Component
 {
-    public static string READDB => throw new NotImplementedException();
+    public static string READDB => "SELECT * FROM motors";
 
     public int Id{get;set;}
     public string? Name{get;set;}
@@ -11,9 +11,12 @@ public class Motor : Component
 
     public void LoadData(SqliteDataReader reader)
     {
-        throw new NotImplementedException();
+        Id = reader.GetInt32(0);
+        Name = reader.GetString(1);
+        Power = reader.GetInt32(2);
+        Fiability = reader.GetInt32(3);
     }
-
+    public float GetGeneral() => (Power + Fiability)/2f;
     public override string ToString()
     {
         throw new NotImplementedException();
