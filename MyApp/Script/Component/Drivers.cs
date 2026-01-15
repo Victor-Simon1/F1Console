@@ -86,7 +86,12 @@ public class  Driver : Component,IUpdatable
     #region INIT_FUNCTION
     public void LoadData(SqliteDataReader reader)
     {
-        //Console.WriteLine("LoadData");
+        if (reader == null)
+        {
+            RacingLogger.Error("LoadData: reader is null");
+            return;
+        }
+
         Id = reader.GetInt32(0);
         FirstName = reader.GetString(1);
         LastName = reader.GetString(2);
@@ -136,7 +141,7 @@ public class  Driver : Component,IUpdatable
             divisor += array[i];
         }
            
-        return  maxPoint/divisor;
+        return maxPoint / divisor;
     } 
     private float CalculateMaxTurnPoint()
     {
@@ -192,7 +197,7 @@ public class  Driver : Component,IUpdatable
                 raceStat.penaltyPoint[(int)EEventType.DAMAGE_WINGS] = 0.1f;
                 break;
             default :
-                Console.WriteLine("Error : EEventType not recognize");
+                RacingLogger.Error("Error : EEventType not recognize");
             break;
         }
     }
@@ -210,19 +215,19 @@ public class  Driver : Component,IUpdatable
         for(int i = 0;i<(int)EDriverStats.MAX;i++)
             driverStats[i] += update;
         if(update != 0)
-            Console.WriteLine("Le pilote " + LastName + " a changé de notes");
+            RacingLogger.Info("Le pilote " + LastName + " a changé de notes");
     }
     public int BirthdateToAge()
     {
         if (string.IsNullOrEmpty(Birthdate))
         {
-            Console.WriteLine($"Warning: Birthdate is null or empty for driver {GetName()}");
+            RacingLogger.Warning($"Warning: Birthdate is null or empty for driver {GetName()}");
             return 0;
         }
 
         if (GameManager.instance == null)
         {
-            Console.WriteLine($"Warning: GameManager.instance is null");
+            RacingLogger.Warning($" GameManager.instance is null");
             return 0;
         }
 

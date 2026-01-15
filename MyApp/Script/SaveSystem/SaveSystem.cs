@@ -39,7 +39,7 @@ public class SaveSystem
     }
     public static Save LoadFromJson(ref Info info , string path = @"D:\path.json")
     {
-        Console.WriteLine("Load" + path);
+        RacingLogger.Debug("LoadFromJson: " + path);
 
         string json = File.ReadAllText(path);
         Save save = JsonSerializer.Deserialize<Save>(json);

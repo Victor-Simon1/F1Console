@@ -29,11 +29,10 @@ public class GameManager
         if(instance == null)
             instance = this;
         else
-            Console.WriteLine("A gameManager already exist !");
+            RacingLogger.Error("A gameManager already exist !");
     }
     public void Init()
     {
-        Console.WriteLine("Init database");
         database = new Database();
     }
 
@@ -43,10 +42,10 @@ public class GameManager
         bool isRunning = true;
         while(isRunning)
         {
-            Console.WriteLine("Choose an actions !");
+            RacingLogger.Info("Choose an actions !");
             //database.ClearDatabase(ref info);
             foreach(int action in Enum.GetValues(typeof(EGMActions)))
-                Console.WriteLine(action + " : " + ((EGMActions)action).ToString());
+                RacingLogger.Info(action + " : " + ((EGMActions)action).ToString());
             string? input = Console.ReadLine();
             int inputConvert = RacingLibrary.ConvertStringToInt(input);
             
@@ -68,10 +67,10 @@ public class GameManager
                     break;
                 case (int)EGMActions.EXIT:
                     isRunning = false;
-                    Console.WriteLine("Goodbye !");
+                    RacingLogger.Info("Goodbye !");
                 break;
                 default:
-                    Console.WriteLine("Entry not recognize ! Please enter a number in a relation with the different options ! ");
+                    RacingLogger.Info("Entry not recognize ! Please enter a number in a relation with the different options ! ");
                     break;
             }
         }

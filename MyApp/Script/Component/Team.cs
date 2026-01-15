@@ -52,7 +52,7 @@ public class Team : Component,IUpdatable/*,Saveable*/
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Driver1 (ID: {IdDriver1}) not found for team {Name}: {ex.Message}");
+            RacingLogger.Exception(ex, $"Warning: Driver1 (ID: {IdDriver1}) not found for team {Name}");
             Driver1 = null;
         }
 
@@ -62,7 +62,7 @@ public class Team : Component,IUpdatable/*,Saveable*/
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Driver2 (ID: {IdDriver2}) not found for team {Name}: {ex.Message}");
+            RacingLogger.Exception(ex, $"Warning: Driver2 (ID: {IdDriver2}) not found for team {Name}");
             Driver2 = null;
         }
 
@@ -72,7 +72,7 @@ public class Team : Component,IUpdatable/*,Saveable*/
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Chassis (ID: {IdChassis}) not found for team {Name}: {ex.Message}");
+            RacingLogger.Exception(ex, $"Warning: Chassis (ID: {IdChassis}) not found for team {Name}");
             Chassis = null;
         }
 
@@ -82,7 +82,7 @@ public class Team : Component,IUpdatable/*,Saveable*/
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Motor (ID: {IdMotor}) not found for team {Name}: {ex.Message}");
+            RacingLogger.Exception(ex, $"Warning: Motor (ID: {IdMotor}) not found for team {Name}");
             Motor = null;
         }
     }
@@ -97,7 +97,7 @@ public class Team : Component,IUpdatable/*,Saveable*/
     {
         if(Driver1 == null || Driver2 == null)
         {
-             Console.WriteLine("Drivers are null");
+             RacingLogger.Error("Drivers are null");
              return 0;
         }
         return Driver1.seasonStat.seasonPoint + Driver2.seasonStat.seasonPoint;

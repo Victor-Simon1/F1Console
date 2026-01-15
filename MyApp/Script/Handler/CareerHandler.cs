@@ -33,31 +33,29 @@ public class CarrerHandler
     public void SelectMode()
     {
         foreach(int action in Enum.GetValues(typeof(EGMCarrerActions)))
-            Console.WriteLine(action + " : " + ((EGMCarrerActions)action).ToString());
+            RacingLogger.Info(action + " : " + ((EGMCarrerActions)action).ToString());
         int inputConvert = RacingLibrary.GetIntInput();
         switch(inputConvert)
         {
             case (int)EGMCarrerActions.NEW:
-                //Console.WriteLine("TODO ");
                 NewCareer();
                 break;
             case (int)EGMCarrerActions.LOAD:
                 LoadCareer();
                 break;
             case (int)EGMCarrerActions.RETURN:
-                Console.WriteLine("TODO ");
+                RacingLogger.Warning("TODO ");
                 break;
             default:
-                Console.WriteLine("Entry not recognize ! Please enter a number in a relation with the different options ! ");
+                RacingLogger.Error("Entry not recognize ! Please enter a number in a relation with the different options ! ");
                 break;
         }
-        Console.WriteLine("TODO ");
     }
 
     private void NewCareer()
     {
-        Console.WriteLine("Basefile " + RacingLibrary.BASEFILE);
-        Console.WriteLine("Nom de la carriere?");
+        RacingLogger.Info("Basefile " + RacingLibrary.BASEFILE);
+        RacingLogger.Info("Nom de la carriere?");
         string? input = Console.ReadLine();
 
         string directory = RacingLibrary.SAVEFILE + "\\"+ input;
@@ -71,16 +69,16 @@ public class CarrerHandler
         {
             // Copy the file and overwrite if it already exists
             File.Copy(sourceFile, destinationDB);
-            Console.WriteLine("File copied successfully at " + destinationDB);
+            RacingLogger.Info("File copied successfully at " + destinationDB);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex.Message}");
+            RacingLogger.Error($"Error: {ex.Message}");
         }
         //System.Threading.Thread.Sleep(1000);
         if (GameManager.instance?.database == null)
         {
-            Console.WriteLine("Error: GameManager or database is not initialized");
+            RacingLogger.Error("Error: GameManager or database is not initialized");
             return;
         }
         GameManager.instance.database.CurrentDatabaseName = dbFile;
@@ -96,9 +94,9 @@ public class CarrerHandler
                 t.SetFromId(ref info);
         }
 
-        Console.WriteLine("Quelle systeme de points voulez vous utilisez?");
+        RacingLogger.Info("Quelle systeme de points voulez vous utilisez?");
         foreach(int pointSystemName in Enum.GetValues(typeof(PointSystem.EPointSystem)))
-                Console.WriteLine(pointSystemName + " : " + ((PointSystem.EPointSystem)pointSystemName).ToString());
+                RacingLogger.Info(pointSystemName + " : " + ((PointSystem.EPointSystem)pointSystemName).ToString());
         int pSystemInput = RacingLibrary.GetIntInput();
         pointSystem.actualPointSystem = (PointSystem.EPointSystem)pSystemInput;
     }
@@ -112,9 +110,9 @@ public class CarrerHandler
         bool isLooping = true;
         while(isLooping)
         {
-            Console.WriteLine(carreerPath + " : GP " + indexRace + "/" + info?.raceList.Count + " - Year : " + year );
+            RacingLogger.Info(carreerPath + " : GP " + indexRace + "/" + info?.raceList.Count + " - Year : " + year );
             foreach(int action in Enum.GetValues(typeof(EGMCarrerLoopActions)))
-                Console.WriteLine(action + " : " + ((EGMCarrerLoopActions)action).ToString());
+                RacingLogger.Info(action + " : " + ((EGMCarrerLoopActions)action).ToString());
             string? input = Console.ReadLine();
             int inputConvert = RacingLibrary.ConvertStringToInt(input);
             switch(inputConvert)
@@ -144,7 +142,7 @@ public class CarrerHandler
             return;
         if(indexRace >= info.raceList.Count)
         {
-            Console.WriteLine("ERROR ! RACE NOT RECOGNIZE !! ");
+            RacingLogger.Error("ERROR ! RACE NOT RECOGNIZE !! ");
             return;
         }
         actualRace = info.raceList[indexRace];
@@ -169,7 +167,7 @@ public class CarrerHandler
     {
         if(info == null)
         {
-            Console.WriteLine("Error: Info is not initialized");
+            RacingLogger.Error("Error: Info is not initialized");
             return;
         }
         
@@ -181,7 +179,7 @@ public class CarrerHandler
             if(!info.dictionnaryTeam.TryGetValue(division, out List<Team>? teams) || teams == null || teams.Count <= 0)
                 continue;
             
-            Console.WriteLine("--- " + division + " ---- ");
+            RacingLogger.Info("--- " + division + " ---- ");
             info.driversList.Clear();
             
             // Collecter tous les pilotes de cette division
@@ -196,31 +194,31 @@ public class CarrerHandler
             
             // Afficher le classement des pilotes
             info.driversList.Sort((x,y) => y.seasonStat.seasonPoint.CompareTo(x.seasonStat.seasonPoint));
-            Console.WriteLine("Drivers Standings : ");
+            RacingLogger.Info("Drivers Standings : ");
             string headerDriverStr = "#".PadRight(StringRacing.PadRightIndex) 
                 + " Name".PadRight(StringRacing.PadRightNameDriver) + " | " 
                 + "Points".PadRight(StringRacing.PadRightSeason) + " | " 
                 + "Dnf".PadRight(StringRacing.PadRightSeason) + " | " 
                 + "AvgPlace".PadRight(StringRacing.PadRightSeason);
-            Console.WriteLine(headerDriverStr);
+            RacingLogger.Info(headerDriverStr);
             
             for(int index = 0; index < info.driversList.Count; index++)
-                Console.WriteLine("#" + (index+1).ToString().PadRight(StringRacing.PadRightIndex) 
+                RacingLogger.Info("#" + (index+1).ToString().PadRight(StringRacing.PadRightIndex) 
                 + info.driversList[index].GetName().PadRight(StringRacing.PadRightNameDriver) 
                 + " " + info.driversList[index].ToStringSeason());
 
             // Afficher le classement des équipes
             teams.Sort((x,y) => y.GetSeasonPoint().CompareTo(x.GetSeasonPoint()));
-            Console.WriteLine("Teams Standings : ");
+            RacingLogger.Info("Teams Standings : ");
             string headerTeamStr = "#".PadRight(StringRacing.PadRightIndex) 
                             + " Name".PadRight(StringRacing.PadRightNameTeam) + " | " 
                             + "Points".PadRight(StringRacing.PadRightPointTeam);
-            Console.WriteLine(headerTeamStr);
+            RacingLogger.Info(headerTeamStr);
             
             for(int index = 0; index < teams.Count; index++)
             {
                 string teamName = teams[index].Name ?? "Unknown";
-                Console.WriteLine("#" + (index+1).ToString().PadRight(StringRacing.PadRightIndex) + " " 
+                RacingLogger.Info("#" + (index+1).ToString().PadRight(StringRacing.PadRightIndex) + " " 
                 + teamName.PadRight(StringRacing.PadRightNameTeam) + "| " 
                 + teams[index].GetSeasonPoint().ToString().PadRight(StringRacing.PadRightPointTeam));
             }
@@ -231,7 +229,7 @@ public class CarrerHandler
     {
         if(info == null)
         {
-            Console.WriteLine("Error: Info is not initialized");
+            RacingLogger.Error("Error: Info is not initialized");
             return;
         }
         
@@ -243,7 +241,7 @@ public class CarrerHandler
             if(!info.dictionnaryTeam.TryGetValue(division, out List<Team>? teams) || teams == null || teams.Count <= 0)
                 continue;
             
-            Console.WriteLine("--- " + division + " ---- ");
+            RacingLogger.Info("--- " + division + " ---- ");
             info.driversList.Clear();
             
             // Collecter tous les pilotes de cette division
@@ -258,15 +256,15 @@ public class CarrerHandler
             
             // Afficher les notes des pilotes
             info.driversList.Sort((x,y) => y.GetGeneral().CompareTo(x.GetGeneral()));
-            Console.WriteLine("Drivers Notes : ");
+            RacingLogger.Info("Drivers Notes : ");
             for(int index = 0; index < info.driversList.Count; index++)
-                Console.WriteLine("#" + (index+1) + " " + info.driversList[index].GetName() + " " + info.driversList[index].GetGeneral());
+                RacingLogger.Info("#" + (index+1) + " " + info.driversList[index].GetName() + " " + info.driversList[index].GetGeneral());
 
             // Afficher les notes des équipes
             teams.Sort((x,y) => y.GetGeneral().CompareTo(x.GetGeneral()));
-            Console.WriteLine("Teams Notes : ");
+            RacingLogger.Info("Teams Notes : ");
             for(int index = 0; index < teams.Count; index++)
-                Console.WriteLine("#" + (index+1) + " " + teams[index].Name + " - " + teams[index].GetGeneral());
+                RacingLogger.Info("#" + (index+1) + " " + teams[index].Name + " - " + teams[index].GetGeneral());
         }
     }
 
@@ -274,10 +272,10 @@ public class CarrerHandler
     {
         if(info == null)
         {
-            Console.WriteLine("Error: Info is not initialized");
+            RacingLogger.Error("Error: Info is not initialized");
             return;
         }
-        Console.WriteLine("New Season !! ");
+        RacingLogger.Info("New Season !! ");
         //Show Standing before next year
         ShowRanking();
 
@@ -316,25 +314,25 @@ public class CarrerHandler
     {
         if (info == null || GameManager.instance?.database == null)
         {
-            Console.WriteLine("Cannot save: info or database is null");
+            RacingLogger.Error("Cannot save: info or database is null");
             return;
         }
 
         if (string.IsNullOrEmpty(carreerPath))
         {
-            Console.WriteLine("Cannot save: career path is empty");
+            RacingLogger.Error("Cannot save: career path is empty");
             return;
         }
 
         string[] allfiles = Directory.GetFiles(carreerPath, "*.json", SearchOption.TopDirectoryOnly);
         if (allfiles.Length == 0)
         {
-            Console.WriteLine("No JSON file found in career path");
+            RacingLogger.Error("No JSON file found in career path");
             return;
         }
 
         string jsonPath = allfiles[0];
-        Console.WriteLine("Save career to path: " + jsonPath);
+        RacingLogger.Info("Save career to path: " + jsonPath);
         SaveSystem.SaveListToJson(this, jsonPath);
         
         foreach(Team team in info.teamsList)
@@ -348,19 +346,19 @@ public class CarrerHandler
             if (team.Driver2 != null)
                 GameManager.instance.database.UpdateRow<Driver>(team.Driver2, "drivers");
         }
-        Console.WriteLine("Career saved successfully");
+        RacingLogger.Info("Career saved successfully");
     }
 
     private void LoadCareer()
     {
         if(info == null)
             return;
-        Console.WriteLine("Nom de la carriere?");
+        RacingLogger.Info("Nom de la carriere?");
         //Get all folder in save  
         
         string[] allfiles = Directory.GetDirectories("Saves" , "*.*", SearchOption.TopDirectoryOnly);
         for(int i= 0; i < allfiles.Length ; i++)
-            Console.WriteLine(i+ " : " + allfiles[i]);
+            RacingLogger.Info(i+ " : " + allfiles[i]);
         
         //int nbRace = info.raceList.Count;
         

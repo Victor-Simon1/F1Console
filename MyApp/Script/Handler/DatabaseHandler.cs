@@ -22,32 +22,32 @@ public class DatabaseHandler
     {
         if (parent?.database == null)
         {
-            Console.WriteLine("Database is not initialized");
+            RacingLogger.Error("Database is not initialized");
             return;
         }
 
         int input = SelectActions();
         if (input < 0 || input >= allfiles.Length)
         {
-            Console.WriteLine("Invalid database selection");
+            RacingLogger.Error("Invalid database selection");
             return;
         }
 
-        Console.WriteLine("Selected database: " + allfiles[input]);
+        RacingLogger.Info("Selected database: " + allfiles[input]);
         parent.database.CurrentDatabaseName = allfiles[input];
         parent.database.LoadDatabase();
         EDBMode mode = SelectModification();
         parent.database.GetTables();
-        Console.WriteLine("Mode: " + mode);
+        RacingLogger.Info("Mode: " + mode);
 
         input = SelectTable();
         if (input < 0 || input >= parent.database.tablesNameList.Count)
         {
-            Console.WriteLine("Invalid table selection");
+            RacingLogger.Error("Invalid table selection");
             return;
         }
 
-        Console.WriteLine("Selected table: " + parent.database.tablesNameList[input]);
+        RacingLogger.Info("Selected table: " + parent.database.tablesNameList[input]);
         parent.database.CurrentTableName = parent.database.tablesNameList[input];
 
         switch(mode)
@@ -59,7 +59,7 @@ public class DatabaseHandler
                 HandleDeleteMode();
                 break;
             default:
-                Console.WriteLine("Entry not recognized");
+                RacingLogger.Error("Entry not recognized");
                 break;
         }
     }
@@ -72,14 +72,14 @@ public class DatabaseHandler
         parent.database.GetColumnNames();
         if (parent.database.columnsNameList.Count <= 1)
         {
-            Console.WriteLine("No columns available to add");
+            RacingLogger.Error("No columns available to add");
             return;
         }
 
         // Construire la liste des noms de colonnes (sauf ID)
         var columnNames = string.Join(", ", parent.database.columnsNameList.Skip(1));
-        Console.WriteLine("Columns: " + columnNames);
-        Console.WriteLine("Enter values separated by commas (or -1 to quit):");
+        RacingLogger.Info("Columns: " + columnNames);
+        RacingLogger.Info("Enter values separated by commas (or -1 to quit):");
 
         bool isAdding = true;
         while(isAdding)
@@ -99,7 +99,7 @@ public class DatabaseHandler
             string[] values = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (values.Length != parent.database.columnsNameList.Count - 1)
             {
-                Console.WriteLine($"Expected {parent.database.columnsNameList.Count - 1} values, got {values.Length}");
+                RacingLogger.Error($"Expected {parent.database.columnsNameList.Count - 1} values, got {values.Length}");
                 continue;
             }
 
@@ -113,25 +113,25 @@ public class DatabaseHandler
             return;
 
         parent.database.ShowTable(parent.database.CurrentTableName);
-        Console.WriteLine("Enter an ID to delete, -1 to quit");
+        RacingLogger.Info("Enter an ID to delete, -1 to quit");
         
         int input = RacingLibrary.GetIntInput();
         while(input != -1)
         {
             parent.database.DeleteRow(parent.database.CurrentTableName, input);
-            Console.WriteLine("Enter an ID to delete, -1 to quit");
+            RacingLogger.Info("Enter an ID to delete, -1 to quit");
             input = RacingLibrary.GetIntInput();
         }
     }
     private int SelectActions()
     {
-        Console.WriteLine("Choose an action!");
-        Console.WriteLine("1 : Modify a database");
+        RacingLogger.Info("Choose an action!");
+        RacingLogger.Info("1 : Modify a database");
         GetDatabases();
         
         if (allfiles == null || allfiles.Length == 0)
         {
-            Console.WriteLine("No databases found");
+            RacingLogger.Error("No databases found");
             return -1;
         }
 
@@ -141,9 +141,9 @@ public class DatabaseHandler
 
     private EDBMode SelectModification()
     {
-        Console.WriteLine("Choose a mode");
-        Console.WriteLine("0 : ADD ");
-        Console.WriteLine("1 : DELETE");
+        RacingLogger.Info("Choose a mode");
+        RacingLogger.Info("0 : ADD ");
+        RacingLogger.Info("1 : DELETE");
 
         int input = RacingLibrary.GetValidatedIntInput(0, (int)EDBMode.MAX - 1, "Invalid mode selection. Please enter 0 for ADD or 1 for DELETE");
         return (EDBMode)input;
@@ -153,35 +153,35 @@ public class DatabaseHandler
     {
         if (parent?.database == null)
         {
-            Console.WriteLine("Database is not initialized");
+            RacingLogger.Error("Database is not initialized");
             return -1;
         }
 
-        Console.WriteLine("Choose a table");
+        RacingLogger.Info("Choose a table");
         for (int i = 0; i < parent.database.tablesNameList.Count; i++)
-            Console.WriteLine(i + " : " + parent.database.tablesNameList[i]);    
+            RacingLogger.Info(i + " : " + parent.database.tablesNameList[i]);    
         
         int input = RacingLibrary.GetValidatedIntInput(0, parent.database.tablesNameList.Count - 1, "Invalid table selection. Please enter a number between 0 and " + (parent.database.tablesNameList.Count - 1));
         return input;
     }
     public void SelectMode()
     {
-        Console.WriteLine("Select a mode !");
-        Console.WriteLine("0 : Modify !");
-        Console.WriteLine("1 : Create !");
+        RacingLogger.Info("Select a mode !");
+        RacingLogger.Info("0 : Modify !");
+        RacingLogger.Info("1 : Create !");
         int input = RacingLibrary.GetIntInput();
         switch(input)
         {
             case (int)EDBActions.MODIFY:
-                Console.WriteLine("Go in modufy !");
+                RacingLogger.Info("Go in modufy !");
                 ModifyDatabase();
             break;
             case (int)EDBActions.CREATE:
-                Console.WriteLine("Go increat !");
+                RacingLogger.Info("Go increat !");
                 CreateDatabase();
             break;
             default:
-                Console.WriteLine("Default !");
+                RacingLogger.Error("Default !");
             break;
         }
     }
@@ -191,10 +191,10 @@ public class DatabaseHandler
     }
     private void GetDatabases()
     {
-        Console.WriteLine("Choose a db");
+        RacingLogger.Info("Choose a db");
         allfiles = Directory.GetFiles("Database", "*.sqlite", SearchOption.AllDirectories);
         for(int i= 0;i<allfiles.Length;i++)
-            Console.WriteLine(i+ " : " + allfiles[i]);
+            RacingLogger.Info(i+ " : " + allfiles[i]);
     }
     private void AddLine()
     {

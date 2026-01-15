@@ -28,7 +28,7 @@ public class PointSystem
         }
         else
         {
-            Console.WriteLine($"Warning: Point system '{actualPointSystem}' not found, no points applied.");
+            RacingLogger.Warning($"Warning: Point system '{actualPointSystem}' not found, no points applied.");
         }
     }
 

@@ -35,18 +35,18 @@ public class Database
         
         if (string.IsNullOrEmpty(CurrentDatabaseName))
         {
-            Console.WriteLine("LoadDatabase: CurrentDatabaseName is empty");
+           RacingLogger.Error("LoadDatabase: CurrentDatabaseName is empty");
             return;
         }
 
-        Console.WriteLine("Try to open : " + CurrentDatabaseName);
+        RacingLogger.Debug("Try to open : " + CurrentDatabaseName);
         try
         {
             using (var connection = GetConnection())
             {
                 connection.Open();
-                Console.WriteLine("Database open ! ");
-                Console.WriteLine(connection.State);  
+                RacingLogger.Debug("Database open ! ");
+                RacingLogger.Debug(connection.State.ToString());  
                 LoadData<Driver>(info.driversList, connection);
                 LoadData<Chassis>(info.chassisList, connection);
                 LoadData<Motor>(info.motorList, connection);
@@ -70,14 +70,14 @@ public class Database
                     if (info.dictionnaryTeam.ContainsKey(team.divison))
                     {
                         info.dictionnaryTeam[team.divison].Add(team);
-                        Console.WriteLine("Team " + team.Name + " a été ajouté dans la division " + team.divison);
+                        RacingLogger.Debug("Team " + team.Name + " a été ajouté dans la division " + team.divison);
                     }
                 }
             }
         }
         catch (SqliteException ex) 
         { 
-            Console.WriteLine("LoadDatabase error: " + ex.Message);
+            RacingLogger.Exception(ex, "LoadDatabase");
         }
     }
 
@@ -104,7 +104,7 @@ public class Database
     {
         if (string.IsNullOrEmpty(CurrentTableName))
         {
-            Console.WriteLine("GetColumnNames: CurrentTableName is empty");
+            RacingLogger.Error("GetColumnNames: CurrentTableName is empty");
             return;
         }
 
@@ -131,14 +131,14 @@ public class Database
 
                         if (columnsNameList.Count == 0)
                         {
-                            Console.WriteLine($"No columns found for table '{CurrentTableName}'.");
+                            RacingLogger.Warning($"No columns found for table '{CurrentTableName}'.");
                         }
                         else
                         {
-                            Console.WriteLine($"Columns in '{CurrentTableName}':");
+                            RacingLogger.Debug($"Columns in '{CurrentTableName}':");
                             foreach (var col in columnsNameList)
                             {
-                                Console.WriteLine($"- {col}");
+                                RacingLogger.Debug($"- {col}");
                             }
                         }
                     }
@@ -147,7 +147,7 @@ public class Database
         }
         catch (SqliteException ex)
         {
-            Console.WriteLine("GetColumnNames error: " + ex.Message);
+            RacingLogger.Exception(ex, "GetColumnNames");
         }
     }
     public void GetTables()
@@ -162,7 +162,7 @@ public class Database
             DataTable? table = GetDataTable(query);
             if (table == null)
             {
-                Console.WriteLine("GetTables: Failed to retrieve tables");
+                RacingLogger.Error("GetTables: Failed to retrieve tables");
                 return;
             }
 
@@ -172,14 +172,14 @@ public class Database
                 string? valueStr = value?.ToString();
                 if(!string.IsNullOrEmpty(valueStr) && !valueStr.Contains("sqlite"))
                 {
-                    Console.WriteLine(valueStr);
+                    RacingLogger.Debug(valueStr);
                     tablesNameList.Add(valueStr);
                 }
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine("GetTables error: " + e.Message);
+            RacingLogger.Exception(e, "GetTables");
         }
     }
     public DataTable? GetDataTable(string sql)
@@ -202,7 +202,7 @@ public class Database
         }
         catch (Exception e)
         {
-            Console.WriteLine("GetDataTable error: " + e.Message);
+            RacingLogger.Exception(e, "GetDataTable");
             return null;
         }
     }
@@ -212,7 +212,7 @@ public class Database
     {
         if (string.IsNullOrEmpty(table))
         {
-            Console.WriteLine("DeleteRow: Table name is empty");
+            RacingLogger.Error("DeleteRow: Table name is empty");
             return;
         }
 
@@ -231,7 +231,7 @@ public class Database
         }
         catch (SystemException ex)
         {
-            Console.WriteLine("DeleteRow error: " + ex.Message);
+            RacingLogger.Exception(ex, "DeleteRow");
         }
     }
     #endregion
@@ -242,7 +242,7 @@ public class Database
     {
         if (string.IsNullOrEmpty(table))
         {
-            Console.WriteLine("UpdateRow: Table name is empty");
+            RacingLogger.Error("UpdateRow: Table name is empty");
             return;
         }
 
@@ -263,7 +263,7 @@ public class Database
         }
         catch (SystemException ex)
         {
-            Console.WriteLine("UpdateRow error: " + ex.Message);
+            RacingLogger.Exception(ex, "UpdateRow");
         }
     }
     #endregion
@@ -273,7 +273,7 @@ public class Database
     {
         if (string.IsNullOrEmpty(table))
         {
-            Console.WriteLine("AddRow: Table name is empty");
+            RacingLogger.Error("AddRow: Table name is empty");
             return;
         }
 
@@ -294,26 +294,26 @@ public class Database
         }
         catch (SystemException ex)
         {
-            Console.WriteLine("AddRow error: " + ex.Message);
+            RacingLogger.Exception(ex, "AddRow");
         }
     }
     public void InsertRowInTable(string table, string columnNames, string[] values)
     {
         if (string.IsNullOrEmpty(table))
         {
-            Console.WriteLine("InsertRowInTable: Table name is empty");
+            RacingLogger.Error("InsertRowInTable: Table name is empty");
             return;
         }
 
         if (string.IsNullOrEmpty(columnNames))
         {
-            Console.WriteLine("InsertRowInTable: Column names are empty");
+            RacingLogger.Error("InsertRowInTable: Column names are empty");
             return;
         }
 
         if (values == null || values.Length == 0)
         {
-            Console.WriteLine("InsertRowInTable: No values provided");
+            RacingLogger.Error("InsertRowInTable: No values provided");
             return;
         }
 
@@ -339,7 +339,7 @@ public class Database
         }
         catch (SqliteException ex)
         {
-            Console.WriteLine("InsertRowInTable error: " + ex.Message);
+            RacingLogger.Exception(ex, "InsertRowInTable");
         }
     }    
     #endregion
@@ -348,7 +348,7 @@ public class Database
     {
         if (string.IsNullOrEmpty(table))
         {
-            Console.WriteLine("ShowTable: Table name is empty");
+            RacingLogger.Error("ShowTable: Table name is empty");
             return;
         }
 
@@ -362,11 +362,11 @@ public class Database
                 {
                     using (SqliteDataReader reader = command.ExecuteReader())
                     {
-                        Console.WriteLine("--------------------------------");
-                        Console.WriteLine(table);
+                        RacingLogger.Info("--------------------------------");
+                        RacingLogger.Info(table);
                         if (!reader.HasRows)
                         {
-                            Console.WriteLine("No rows found.");
+                            RacingLogger.Warning("No rows found.");
                             return;
                         }
                         int character = 0;
@@ -375,27 +375,27 @@ public class Database
                         {
                             string columnHeader = reader.GetName(i).PadRight(20);
                             character += columnHeader.Length;
-                            Console.Write(columnHeader);
+                            RacingLogger.Info(columnHeader);
                         }
-                        Console.WriteLine("\n" + new string('-', character));
+                        RacingLogger.Info("\n" + new string('-', character));
                         // Print all rows
                         while (reader.Read())
                         {
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
                                 string? value = reader[i]?.ToString();
-                                Console.Write((value ?? string.Empty).PadRight(20));
+                                RacingLogger.Info((value ?? string.Empty).PadRight(20));
                             }
-                            Console.WriteLine();
+                            RacingLogger.Info("");
                         }
                     }
                 }
-                Console.WriteLine("--------------------------------");
+                RacingLogger.Info("--------------------------------");
             }
         }
         catch (SystemException ex)
         {
-            Console.WriteLine("ShowTable error: " + ex.Message);
+            RacingLogger.Exception(ex, "ShowTable");
         }
     }
     #endregion

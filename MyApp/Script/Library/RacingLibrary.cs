@@ -1,5 +1,3 @@
-using System.Reflection;
-
 public static class RacingLibrary
 {
     static Random rand = new Random();
@@ -82,7 +80,7 @@ public static class RacingLibrary
                 maxValue= minValue + 1;
             break;
             default:
-                Console.WriteLine("Form not determined ");
+                RacingLogger.Warning("Form not determined ");
             break;
         }
     }
@@ -95,7 +93,7 @@ public static class RacingLibrary
         }
         catch(Exception e)
         {
-            Console.WriteLine(e.ToString());
+            RacingLogger.Exception(e, "ConvertStringToInt");
             return -1;
         }
     }
@@ -114,7 +112,7 @@ public static class RacingLibrary
     {
         if(value < min || value > max)
         {
-            Console.WriteLine(errorText);
+            RacingLogger.Warning(errorText);
             return false;
         }
         return true;

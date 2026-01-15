@@ -26,24 +26,24 @@ public class RaceHandler
     }
     private void GetDatabases()
     {
-        Console.WriteLine("Choose a db");
+        RacingLogger.Info("Choose a db");
         allfiles = Directory.GetFiles("Database", "*.sqlite", SearchOption.AllDirectories);
         for(int i= 0;i<allfiles.Length;i++)
-            Console.WriteLine(i+ " : " + allfiles[i]);
+            RacingLogger.Info(i+ " : " + allfiles[i]);
     }
 
     private void ChooseDatabase()
     {
         if (GameManager.instance?.database == null)
         {
-            Console.WriteLine("GameManager or database is not initialized");
+            RacingLogger.Error("GameManager or database is not initialized");
             return;
         }
 
         GetDatabases();
         if (allfiles == null || allfiles.Length == 0)
         {
-            Console.WriteLine("No databases found");
+            RacingLogger.Error("No databases found");
             return;
         }
 
@@ -55,11 +55,11 @@ public class RaceHandler
 
     private void ChooseRace()
     {
-        Console.WriteLine("Choose a race ! " + info.raceList.Count );
+        RacingLogger.Info("Choose a race ! " + info.raceList.Count );
         if(info.raceList.Count <= 0)
             return;
         for(int i= 0;i<info.raceList.Count;i++)
-            Console.WriteLine(i+ " : " + info.raceList[i].Name);
+            RacingLogger.Info(i+ " : " + info.raceList[i].Name);
         int input = RacingLibrary.GetValidatedIntInput(0, info.raceList.Count - 1, "Invalid race selection. Please enter a number between 0 and " + (info.raceList.Count - 1));
         indexRace = input;
     }
@@ -79,22 +79,22 @@ public class RaceHandler
         EventExtensions.InitEvent();
         Race currentRace = info.raceList[indexRace];
         //foreach(EDivisionType eDivisionType in currentRace.divisionRacing)
-        Console.WriteLine("Division " +division);
+        RacingLogger.Info("Division " +division);
         if(!currentRace.divisionRacing.Contains(division) || info.dictionnaryTeam[division].Count <=0)
         {
-            Console.WriteLine("Pas de course de cette division "+ division + " cette semaine !");
+            RacingLogger.Info("Pas de course de cette division "+ division + " cette semaine !");
             return;
         }
             
-        Console.WriteLine(currentRace.ToString());
+        RacingLogger.Info(currentRace.ToString());
 
         float maxPoint = currentRace.MaxTour * Driver.CalculMaxPoints(currentRace.NbTurn,currentRace.Length);
-        Console.WriteLine("Max point " + maxPoint);
+        RacingLogger.Info("Max point " + maxPoint);
         foreach(Team team in info.dictionnaryTeam[division] )
         {
             if (team.Driver1 == null || team.Driver2 == null)
             {
-                Console.WriteLine($"Warning: Team {team.Name} has null drivers, skipping");
+                RacingLogger.Warning($"Warning: Team {team.Name} has null drivers, skipping");
                 continue;
             }
             team.Driver1.CalculDayForm();
@@ -117,10 +117,10 @@ public class RaceHandler
             }
                 
         }
-        Console.WriteLine("Recap " + info.dictionnaryTeam[division].Count);
+        RacingLogger.Info("Recap " + info.dictionnaryTeam[division].Count);
 
         info.driversList.Clear();
-        Console.WriteLine(info.driversList.Count);
+        RacingLogger.Info(info.driversList.Count.ToString());
         foreach(Team team in info.dictionnaryTeam[division] )
         {
             if (team.Driver1 != null)
@@ -132,14 +132,14 @@ public class RaceHandler
         info.dictionnaryTeam[division].Sort((x,y) =>y.GetGeneral().CompareTo(x.GetGeneral()));
 
         
-        Console.WriteLine("-------------------");
+        RacingLogger.Info("-------------------");
         for(int pos = 0; pos < info.driversList.Count ; pos++ )
         {
             Driver d = info.driversList[pos];
             float pen = 0;
             for(int i =0;i<d.raceStat.penaltyPoint.Length;i++)
                 pen += d.raceStat.penaltyPoint[i];
-            Console.WriteLine("#" + (pos+1) +":" +d.FirstName + d.LastName + " : " + (d.raceStat.racePoints/maxPoint)*100f + " / " + d.GetGeneral()  +
+            RacingLogger.Info("#" + (pos+1) +":" +d.FirstName + d.LastName + " : " + (d.raceStat.racePoints/maxPoint)*100f + " / " + d.GetGeneral()  +
               " / " + d.raceStat.dayForm + " / " + d.raceStat.hasDNF+ "/ " + pen);
 
             d.seasonStat.sumPlace += (pos+1);
