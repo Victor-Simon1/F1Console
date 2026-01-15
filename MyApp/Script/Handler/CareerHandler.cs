@@ -327,13 +327,7 @@ public class CarrerHandler
         
         //int nbRace = info.raceList.Count;
         
-        int input = RacingLibrary.GetIntInput();
-        bool goodEntry = RacingLibrary.VerifyInput(input, 0, allfiles.Length, "TODO");
-        while(!goodEntry)
-        {
-            input = RacingLibrary.GetIntInput();
-            goodEntry = RacingLibrary.VerifyInput(input,0,allfiles.Length,"TODO");
-        }
+        int input = RacingLibrary.GetValidatedIntInput(0, allfiles.Length - 1, "Invalid career selection. Please enter a number between 0 and " + (allfiles.Length - 1));
         carreerPath = allfiles[input];
 
         LoadList();

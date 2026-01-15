@@ -135,30 +135,18 @@ public class DatabaseHandler
             return -1;
         }
 
-        int input = RacingLibrary.GetIntInput();
-        bool goodEntry = RacingLibrary.VerifyInput(input, 0, allfiles.Length, "Invalid database selection");
-        while(!goodEntry)
-        {
-            input = RacingLibrary.GetIntInput();
-            goodEntry = RacingLibrary.VerifyInput(input, 0, allfiles.Length, "Invalid database selection");
-        }
+        int input = RacingLibrary.GetValidatedIntInput(0, allfiles.Length - 1, "Invalid database selection. Please enter a number between 0 and " + (allfiles.Length - 1));
         return input;
     }
 
     private EDBMode SelectModification()
     {
         Console.WriteLine("Choose a mode");
-        Console.WriteLine("1 : ADD ");
-        Console.WriteLine("2 : DELETE");
+        Console.WriteLine("0 : ADD ");
+        Console.WriteLine("1 : DELETE");
 
-        EDBMode mode = (EDBMode)RacingLibrary.GetIntInput();
-        bool goodEntry = RacingLibrary.VerifyInput((int)mode,0,(int)EDBMode.MAX,"TODO");
-        while(!goodEntry)
-        {
-            mode = (EDBMode)RacingLibrary.GetIntInput();
-            goodEntry = RacingLibrary.VerifyInput((int)mode,0,(int)EDBMode.MAX,"TODO");
-        }
-        return mode;
+        int input = RacingLibrary.GetValidatedIntInput(0, (int)EDBMode.MAX - 1, "Invalid mode selection. Please enter 0 for ADD or 1 for DELETE");
+        return (EDBMode)input;
     }
 
     private int SelectTable()
@@ -173,13 +161,7 @@ public class DatabaseHandler
         for (int i = 0; i < parent.database.tablesNameList.Count; i++)
             Console.WriteLine(i + " : " + parent.database.tablesNameList[i]);    
         
-        int input = RacingLibrary.GetIntInput();
-        bool goodEntry = RacingLibrary.VerifyInput(input, 0, parent.database.tablesNameList.Count, "Invalid table selection");
-        while(!goodEntry)
-        {
-            input = RacingLibrary.GetIntInput();
-            goodEntry = RacingLibrary.VerifyInput(input, 0, parent.database.tablesNameList.Count, "Invalid table selection");
-        }
+        int input = RacingLibrary.GetValidatedIntInput(0, parent.database.tablesNameList.Count - 1, "Invalid table selection. Please enter a number between 0 and " + (parent.database.tablesNameList.Count - 1));
         return input;
     }
     public void SelectMode()

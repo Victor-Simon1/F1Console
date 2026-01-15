@@ -5,6 +5,9 @@ public static class RacingLibrary
     static Random rand = new Random();
     public static string BASEFILE = System.IO.Directory.GetCurrentDirectory();
     public static string SAVEFILE = BASEFILE + "\\Saves";
+    /// <summary>
+    /// Génère un nombre aléatoire flottant dans la plage [minValue, maxValue] (inclusif)
+    /// </summary>
     public static float GetRandomFloat(float minValue, float maxValue)
     {
         if (minValue > maxValue)
@@ -13,12 +16,35 @@ public static class RacingLibrary
         double range = maxValue - minValue;
         return (float)(minValue + rand.NextDouble() * range);
     }
+    
+    /// <summary>
+    /// Génère un nombre entier aléatoire dans la plage [minValue, maxValue[ (minValue inclusif, maxValue exclusif).
+    /// Note: Pour obtenir maxValue inclusif, utilisez GetRandomInt(minValue, maxValue + 1)
+    /// </summary>
+    /// <param name="minValue">Valeur minimale (inclusive)</param>
+    /// <param name="maxValue">Valeur maximale (exclusive)</param>
+    /// <returns>Un entier aléatoire dans la plage [minValue, maxValue[</returns>
     public static int GetRandomInt(int minValue, int maxValue)
     {
         if (minValue > maxValue)
             throw new ArgumentException("minValue must be less than or equal to maxValue.");
 
-        return  rand.Next(minValue,maxValue);
+        return rand.Next(minValue, maxValue);
+    }
+    
+    /// <summary>
+    /// Génère un nombre entier aléatoire dans la plage [minValue, maxValue] (inclusif des deux côtés).
+    /// Version inclusive qui inclut maxValue dans les résultats possibles.
+    /// </summary>
+    /// <param name="minValue">Valeur minimale (inclusive)</param>
+    /// <param name="maxValue">Valeur maximale (inclusive)</param>
+    /// <returns>Un entier aléatoire dans la plage [minValue, maxValue]</returns>
+    public static int GetRandomIntInclusive(int minValue, int maxValue)
+    {
+        if (minValue > maxValue)
+            throw new ArgumentException("minValue must be less than or equal to maxValue.");
+
+        return rand.Next(minValue, maxValue + 1);
     }
 
     public static void SetMinMaxFormAccordingDayForm(int dayForm,out int minValue,out int maxValue)
@@ -81,14 +107,39 @@ public static class RacingLibrary
         return inputConvert;
     }
 
-    public static bool VerifyInput(int value,int min, int max, string errorText)
+    /// <summary>
+    /// Vérifie si une valeur est dans la plage [min, max] (inclusif)
+    /// </summary>
+    public static bool VerifyInput(int value, int min, int max, string errorText)
     {
-        if(value < 0 || value > max )
+        if(value < min || value > max)
         {
             Console.WriteLine(errorText);
             return false;
         }
         return true;
+    }
+
+    /// <summary>
+    /// Demande une entrée utilisateur et valide qu'elle est dans la plage [min, max] (inclusif).
+    /// Continue à demander jusqu'à ce qu'une valeur valide soit entrée.
+    /// </summary>
+    /// <param name="min">Valeur minimale incluse</param>
+    /// <param name="max">Valeur maximale incluse</param>
+    /// <param name="errorMessage">Message d'erreur à afficher si la valeur est invalide</param>
+    /// <returns>La valeur entière validée</returns>
+    public static int GetValidatedIntInput(int min, int max, string errorMessage)
+    {
+        int input = GetIntInput();
+        bool isValid = VerifyInput(input, min, max, errorMessage);
+        
+        while(!isValid)
+        {
+            input = GetIntInput();
+            isValid = VerifyInput(input, min, max, errorMessage);
+        }
+        
+        return input;
     }
 
     public static Driver GetDriverById(int id,ref Info info)

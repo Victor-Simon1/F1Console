@@ -2,9 +2,9 @@ public class RaceHandler
 {
     
     int indexRace = -1;
-    private string[] allfiles;
+    private string[]? allfiles;
     Info info;
-    PointSystem pointSystem;
+    PointSystem? pointSystem;
 
     public RaceHandler(ref Info _info, ref PointSystem _pointSystem)
     {
@@ -14,6 +14,7 @@ public class RaceHandler
     public RaceHandler()
     {
         info = new Info();
+        pointSystem = null;
     }
     public void Start()
     {
@@ -46,13 +47,7 @@ public class RaceHandler
             return;
         }
 
-        int input = RacingLibrary.GetIntInput();
-        bool goodEntry = RacingLibrary.VerifyInput(input, 0, allfiles.Length, "Invalid database selection");
-        while(!goodEntry)
-        {
-            input = RacingLibrary.GetIntInput();
-            goodEntry = RacingLibrary.VerifyInput(input, 0, allfiles.Length, "Invalid database selection");
-        }
+        int input = RacingLibrary.GetValidatedIntInput(0, allfiles.Length - 1, "Invalid database selection. Please enter a number between 0 and " + (allfiles.Length - 1));
         GameManager.instance.database.CurrentDatabaseName = allfiles[input];
         GameManager.instance.database.info = info;
         GameManager.instance.database.LoadDatabase();
@@ -65,13 +60,7 @@ public class RaceHandler
             return;
         for(int i= 0;i<info.raceList.Count;i++)
             Console.WriteLine(i+ " : " + info.raceList[i].Name);
-        int input = RacingLibrary.GetIntInput();
-        bool goodEntry = RacingLibrary.VerifyInput(input,0,info.raceList.Count,"TODO");
-        while(!goodEntry)
-        {
-            input = RacingLibrary.GetIntInput();
-            goodEntry = RacingLibrary.VerifyInput(input,0,info.raceList.Count,"TODO");
-        }
+        int input = RacingLibrary.GetValidatedIntInput(0, info.raceList.Count - 1, "Invalid race selection. Please enter a number between 0 and " + (info.raceList.Count - 1));
         indexRace = input;
     }
     public void SetRace(int _indexRace)
@@ -157,8 +146,11 @@ public class RaceHandler
             d.seasonStat.nbRaceMake++;
         }
         List<Team> tempList = info.dictionnaryTeam[division];
-        pointSystem.ApplyPointToDriver(ref tempList);
-        info.dictionnaryTeam[division] = tempList;
+        if (pointSystem != null)
+        {
+            pointSystem.ApplyPointToDriver(ref tempList);
+            info.dictionnaryTeam[division] = tempList;
+        }
 
         ResetDriverRaceVariable();
     }
