@@ -78,6 +78,11 @@ public class CarrerHandler
             Console.WriteLine($"Error: {ex.Message}");
         }
         //System.Threading.Thread.Sleep(1000);
+        if (GameManager.instance?.database == null)
+        {
+            Console.WriteLine("Error: GameManager or database is not initialized");
+            return;
+        }
         GameManager.instance.database.CurrentDatabaseName = dbFile;
         GameManager.instance.database.info = info;
         GameManager.instance.database.LoadDatabase();
@@ -85,8 +90,11 @@ public class CarrerHandler
         string jsonSrc = directory+"/"+input+".json";
         File.Create(jsonSrc).Dispose();
         SaveSystem.SaveListToJson(this,jsonSrc);
-        foreach(Team t in info.teamsList)
-            t.SetFromId(ref info);
+        if (info != null)
+        {
+            foreach(Team t in info.teamsList)
+                t.SetFromId(ref info);
+        }
 
         Console.WriteLine("Quelle systeme de points voulez vous utilisez?");
         foreach(int pointSystemName in Enum.GetValues(typeof(PointSystem.EPointSystem)))
@@ -160,51 +168,61 @@ public class CarrerHandler
     private void ShowRanking()
     {
         if(info == null)
-            return;
-        
-        
-        for(int indexDiv =0;indexDiv<(int)EDivisionType.MAX;indexDiv++)
         {
-            if(info.dictionnaryTeam[(EDivisionType)indexDiv].Count <=0)
+            Console.WriteLine("Error: Info is not initialized");
+            return;
+        }
+        
+        for(int indexDiv = 0; indexDiv < (int)EDivisionType.MAX; indexDiv++)
+        {
+            EDivisionType division = (EDivisionType)indexDiv;
+            
+            // Vérifier si la division existe dans le dictionnaire et a des équipes
+            if(!info.dictionnaryTeam.TryGetValue(division, out List<Team>? teams) || teams == null || teams.Count <= 0)
                 continue;
-            Console.WriteLine("--- " + (EDivisionType)indexDiv + " ---- ");
+            
+            Console.WriteLine("--- " + division + " ---- ");
             info.driversList.Clear();
-            for(int indexTeam =0; indexTeam<info.dictionnaryTeam[(EDivisionType)indexDiv].Count;indexTeam++)
+            
+            // Collecter tous les pilotes de cette division
+            for(int indexTeam = 0; indexTeam < teams.Count; indexTeam++)
             {
-                var team = info.dictionnaryTeam[(EDivisionType)indexDiv][indexTeam];
+                var team = teams[indexTeam];
                 if (team.Driver1 != null)
                     info.driversList.Add(team.Driver1);
                 if (team.Driver2 != null)
                     info.driversList.Add(team.Driver2);
             }
-            //Drivers
-            info.driversList.Sort((x,y) =>y.seasonStat.seasonPoint.CompareTo(x.seasonStat.seasonPoint));
+            
+            // Afficher le classement des pilotes
+            info.driversList.Sort((x,y) => y.seasonStat.seasonPoint.CompareTo(x.seasonStat.seasonPoint));
             Console.WriteLine("Drivers Standings : ");
             string headerDriverStr = "#".PadRight(StringRacing.PadRightIndex) 
                 + " Name".PadRight(StringRacing.PadRightNameDriver) + " | " 
                 + "Points".PadRight(StringRacing.PadRightSeason) + " | " 
                 + "Dnf".PadRight(StringRacing.PadRightSeason) + " | " 
                 + "AvgPlace".PadRight(StringRacing.PadRightSeason);
-                Console.WriteLine(headerDriverStr);
-            for(int index = 0;index<info.driversList.Count;index++)
-                Console.WriteLine("#"+(index+1).ToString().PadRight(StringRacing.PadRightIndex) 
+            Console.WriteLine(headerDriverStr);
+            
+            for(int index = 0; index < info.driversList.Count; index++)
+                Console.WriteLine("#" + (index+1).ToString().PadRight(StringRacing.PadRightIndex) 
                 + info.driversList[index].GetName().PadRight(StringRacing.PadRightNameDriver) 
                 + " " + info.driversList[index].ToStringSeason());
 
-             //Teams
-            //for(int indexTeam =0;indexTeam<(int)EDivisionType.MAX;indexTeam++)
+            // Afficher le classement des équipes
+            teams.Sort((x,y) => y.GetSeasonPoint().CompareTo(x.GetSeasonPoint()));
+            Console.WriteLine("Teams Standings : ");
+            string headerTeamStr = "#".PadRight(StringRacing.PadRightIndex) 
+                            + " Name".PadRight(StringRacing.PadRightNameTeam) + " | " 
+                            + "Points".PadRight(StringRacing.PadRightPointTeam);
+            Console.WriteLine(headerTeamStr);
+            
+            for(int index = 0; index < teams.Count; index++)
             {
-                info.dictionnaryTeam[(EDivisionType)indexDiv].Sort((x,y) =>y.GetSeasonPoint().CompareTo(x.GetSeasonPoint()));
-                
-                Console.WriteLine("Teams Standings : ");
-                string headerTeamStr = "#".PadRight(StringRacing.PadRightIndex) 
-                                + " Name".PadRight(StringRacing.PadRightNameTeam) + " | " 
-                                + "Points".PadRight(StringRacing.PadRightPointTeam);
-                Console.WriteLine(headerTeamStr);
-                for(int index = 0;index<info.dictionnaryTeam[(EDivisionType)indexDiv].Count;index++)
-                    Console.WriteLine("#"+(index+1).ToString().PadRight(StringRacing.PadRightIndex) + " " 
-                    +info.dictionnaryTeam[(EDivisionType)indexDiv][index].Name.PadRight(StringRacing.PadRightNameTeam)  + "| " 
-                    + info.dictionnaryTeam[(EDivisionType)indexDiv][index].GetSeasonPoint().ToString().PadRight(StringRacing.PadRightPointTeam));
+                string teamName = teams[index].Name ?? "Unknown";
+                Console.WriteLine("#" + (index+1).ToString().PadRight(StringRacing.PadRightIndex) + " " 
+                + teamName.PadRight(StringRacing.PadRightNameTeam) + "| " 
+                + teams[index].GetSeasonPoint().ToString().PadRight(StringRacing.PadRightPointTeam));
             }
         }
     }
@@ -212,40 +230,53 @@ public class CarrerHandler
     private void ShowNote()
     {
         if(info == null)
-            return;
-        for(int indexDiv =0;indexDiv<(int)EDivisionType.MAX;indexDiv++)
         {
-            if(info.dictionnaryTeam[(EDivisionType)indexDiv].Count <=0)
+            Console.WriteLine("Error: Info is not initialized");
+            return;
+        }
+        
+        for(int indexDiv = 0; indexDiv < (int)EDivisionType.MAX; indexDiv++)
+        {
+            EDivisionType division = (EDivisionType)indexDiv;
+            
+            // Vérifier si la division existe dans le dictionnaire et a des équipes
+            if(!info.dictionnaryTeam.TryGetValue(division, out List<Team>? teams) || teams == null || teams.Count <= 0)
                 continue;
-            Console.WriteLine("--- " + (EDivisionType)indexDiv + " ---- ");
+            
+            Console.WriteLine("--- " + division + " ---- ");
             info.driversList.Clear();
-            for(int indexTeam =0; indexTeam<info.dictionnaryTeam[(EDivisionType)indexDiv].Count;indexTeam++)
+            
+            // Collecter tous les pilotes de cette division
+            for(int indexTeam = 0; indexTeam < teams.Count; indexTeam++)
             {
-                var team = info.dictionnaryTeam[(EDivisionType)indexDiv][indexTeam];
+                var team = teams[indexTeam];
                 if (team.Driver1 != null)
                     info.driversList.Add(team.Driver1);
                 if (team.Driver2 != null)
                     info.driversList.Add(team.Driver2);
             }
-            //Drivers
-            info.driversList.Sort((x,y) =>y.GetGeneral().CompareTo(x.GetGeneral()));
+            
+            // Afficher les notes des pilotes
+            info.driversList.Sort((x,y) => y.GetGeneral().CompareTo(x.GetGeneral()));
             Console.WriteLine("Drivers Notes : ");
-            for(int index = 0;index<info.driversList.Count;index++)
-                Console.WriteLine("#"+(index+1) + " " + info.driversList[index].GetName()+ " " + info.driversList[index].GetGeneral());
+            for(int index = 0; index < info.driversList.Count; index++)
+                Console.WriteLine("#" + (index+1) + " " + info.driversList[index].GetName() + " " + info.driversList[index].GetGeneral());
 
-             //Teams
-            //for(int indexTeam =0;indexTeam<(int)EDivisionType.MAX;indexTeam++)
-            {
-                info.dictionnaryTeam[(EDivisionType)indexDiv].Sort((x,y) =>y.GetGeneral().CompareTo(x.GetGeneral()));
-                Console.WriteLine("Teams Standings : ");
-                for(int index = 0;index<info.dictionnaryTeam[(EDivisionType)indexDiv].Count;index++)
-                    Console.WriteLine("#"+(index+1) + " " +info.dictionnaryTeam[(EDivisionType)indexDiv][index].Name + " - " + info.dictionnaryTeam[(EDivisionType)indexDiv][index].GetGeneral());
-            }
+            // Afficher les notes des équipes
+            teams.Sort((x,y) => y.GetGeneral().CompareTo(x.GetGeneral()));
+            Console.WriteLine("Teams Notes : ");
+            for(int index = 0; index < teams.Count; index++)
+                Console.WriteLine("#" + (index+1) + " " + teams[index].Name + " - " + teams[index].GetGeneral());
         }
     }
 
     private void PassYear()
     {
+        if(info == null)
+        {
+            Console.WriteLine("Error: Info is not initialized");
+            return;
+        }
         Console.WriteLine("New Season !! ");
         //Show Standing before next year
         ShowRanking();
@@ -253,11 +284,17 @@ public class CarrerHandler
         //Pass year stuff
         year++;
         indexRace = 0;
-        for(int indexDiv = 0;indexDiv< (int)EDivisionType.MAX;indexDiv++)
+        for(int indexDiv = 0; indexDiv < (int)EDivisionType.MAX; indexDiv++)
         {
-            for(int indexTeam = 0;indexTeam<info.dictionnaryTeam[(EDivisionType)indexDiv].Count;indexTeam++)
+            EDivisionType division = (EDivisionType)indexDiv;
+            
+            // Vérifier si la division existe dans le dictionnaire
+            if(!info.dictionnaryTeam.TryGetValue(division, out List<Team>? teams) || teams == null)
+                continue;
+            
+            for(int indexTeam = 0; indexTeam < teams.Count; indexTeam++)
             {
-                var team = info.dictionnaryTeam[(EDivisionType)indexDiv][indexTeam];
+                var team = teams[indexTeam];
                 if (team.Driver1 != null)
                 {
                     team.Driver1.seasonStat.seasonPoint = 0;
