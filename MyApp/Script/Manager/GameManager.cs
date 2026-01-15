@@ -20,18 +20,10 @@ public class GameManager
 
 
     public static GameManager? instance;
-    public List<Driver> driversList = new List<Driver>();
-    public List<Team> teamsList = new List<Team>();
-    public List<Motor> motorList = new List<Motor>();
-    public List<Chassis> chassisList = new List<Chassis>();
-    //Tyre
-    public List<TireBrand> tireList = new List<TireBrand>();
-    public List<TireType> tireTypeList = new List<TireType>();
-    //RaceList
-    public List<Race> raceList = new List<Race>();
-    public List<RaceType> raceTypeList = new List<RaceType>();
+
     public Database? database;
 
+    public DateTime baseYear = new DateTime(2026,1,1);
     public GameManager()
     {
         if(instance == null)
@@ -43,12 +35,7 @@ public class GameManager
     {
         Console.WriteLine("Init database");
         database = new Database();
-       // db.LoadDatabase(this);
-
-       //Set Driver Coeff
-       Driver.SetCoeff();
     }
-
 
     public void GameLoop()
     {
@@ -57,11 +44,11 @@ public class GameManager
         while(isRunning)
         {
             Console.WriteLine("Choose an actions !");
-            database.ClearDatabase();
+            //database.ClearDatabase(ref info);
             foreach(int action in Enum.GetValues(typeof(EGMActions)))
                 Console.WriteLine(action + " : " + ((EGMActions)action).ToString());
             string? input = Console.ReadLine();
-            int inputConvert = MyAppLibrary.ConvertStringToInt(input);
+            int inputConvert = RacingLibrary.ConvertStringToInt(input);
             
             switch(inputConvert)
             {
@@ -78,27 +65,6 @@ public class GameManager
                     databaseHandler.SelectMode();
                     break;
                 case (int)EGMActions.DEBUG:
-    
-                    Console.WriteLine("Choose a db");
-                    string[] allfiles = Directory.GetFiles("Database", "*.sqlite", SearchOption.AllDirectories);
-                    for(int i= 0;i<allfiles.Length;i++)
-                        Console.WriteLine(i+ " : " + allfiles[i]);
-                    int myinput = MyAppLibrary.GetIntInput();
-                    bool goodEntry = MyAppLibrary.VerifyInput(myinput,0,allfiles.Length,"TODO");
-                    while(!goodEntry)
-                    {
-                        myinput = MyAppLibrary.GetIntInput();
-                        goodEntry = MyAppLibrary.VerifyInput(myinput,0,allfiles.Length,"TODO");
-                    }
-                    database.CurrentDatabaseName = allfiles[myinput];
-                    database.LoadDatabase();
-                    database.GetTables();
-                    foreach(string tableName in database.tablesNameList)
-                    {
-                        database.ShowTable(tableName);
-                    }
-                    SaveSystem.SaveListToJson();
-                    SaveSystem.LoadFromJson();
                     break;
                 case (int)EGMActions.EXIT:
                     isRunning = false;
@@ -110,7 +76,4 @@ public class GameManager
             }
         }
     }
-
-
-
 }

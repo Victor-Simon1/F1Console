@@ -4,48 +4,46 @@ public class SaveSystem
 {
     public class Save
     {
+        //[JsonInclude]
+        //public List<Driver> drivers = new List<Driver>();
+        //[JsonInclude]
+        //public List<Team> team = new List<Team>();
         [JsonInclude]
-        public List<Driver> drivers = new List<Driver>();
+        public int actualRace;
         [JsonInclude]
-        public List<Team> team = new List<Team>();
-
-
+        public int year;
+        [JsonInclude]
+        public int pointSystemUse;
         public string ToString()
         {
             string str = "";
-            foreach(Driver d in drivers)
-                str += d.ToString() + "\n";
-            foreach(Team t in team)
-                str += t.ToString() + "\n";
+            str += actualRace+"\n";
+            str += year;
             return str;
         }
     }
-    public static Save save;
+    //public static Save save;
     private static string json;
 
-    public static void SaveListToJson(string path = @"D:\path.json")
+    public static void SaveListToJson(CarrerHandler carrerHandler,string path = @"D:\path.json")
     {
-        save = new Save();
+        Save save = new Save();
 
-        foreach(Driver driver in GameManager.instance.driversList)
-            save.drivers.Add(driver);
-        foreach(Team driver in GameManager.instance.teamsList)
-            save.team.Add(driver);
-
+        save.actualRace = carrerHandler.indexRace;
+        save.year = carrerHandler.year;
+        save.pointSystemUse = (int)carrerHandler.pointSystem.actualPointSystem;
         var options = new JsonSerializerOptions { WriteIndented = true };
         
         json = JsonSerializer.Serialize<Save>(save,options);
         File.WriteAllText(path, json);
-
-        Console.WriteLine(save.drivers.Count + " "  + json);
     }
-    public static void LoadFromJson(string path = @"D:\path.json")
+    public static Save LoadFromJson(ref Info info , string path = @"D:\path.json")
     {
+        Console.WriteLine("Load" + path);
+
         string json = File.ReadAllText(path);
         Save save = JsonSerializer.Deserialize<Save>(json);
-        foreach(Team t in save.team)
-            t.SetFromId();
-        Console.WriteLine("Load" + save.ToString());
+        return save;
     }
 
 }

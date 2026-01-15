@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.Data.Sqlite;
 
-public class Team : Component/*,Saveable*/
+public class Team : Component,IUpdatable/*,Saveable*/
 {
     public static string READDB => "SELECT * FROM teams";
 
@@ -21,6 +21,15 @@ public class Team : Component/*,Saveable*/
     public Driver? Driver2 {get;set;}
     public int IdDriver2{get;set;}
 
+
+    public EDivisionType divison;
+    //const variable
+
+    private const float chassisStabilityTurnCoeff = 1.25f;
+    private const float chassisAeroTurnCoeff = 0.25f;
+    private const float motorPowerCoeff = 2.5f;
+    private const float chassisAeroLineCoeff = 1.25f;
+
     public void LoadData(SqliteDataReader reader)
     {
         Id = reader.GetInt32(0);
@@ -31,31 +40,99 @@ public class Team : Component/*,Saveable*/
         IdChassis = reader.GetInt32(4);
         IdMotor = reader.GetInt32(5);
         
-        SetFromId();
+        divison = (EDivisionType)reader.GetInt32(6);
+        //SetFromId(ref info);
     }
 
-    public void SetFromId()
+    public void SetFromId(ref Info info)
     {
-        Driver1 = MyAppLibrary.GetDriverById(IdDriver1);
-        Driver2 = MyAppLibrary.GetDriverById(IdDriver2);
-        Chassis = MyAppLibrary.GetChassisById(IdChassis);
-        Motor = MyAppLibrary.GetMotorById(IdMotor);
+        try
+        {
+            Driver1 = RacingLibrary.GetDriverById(IdDriver1, ref info);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Driver1 (ID: {IdDriver1}) not found for team {Name}: {ex.Message}");
+            Driver1 = null;
+        }
+
+        try
+        {
+            Driver2 = RacingLibrary.GetDriverById(IdDriver2, ref info);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Driver2 (ID: {IdDriver2}) not found for team {Name}: {ex.Message}");
+            Driver2 = null;
+        }
+
+        try
+        {
+            Chassis = RacingLibrary.GetChassisById(IdChassis, ref info);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Chassis (ID: {IdChassis}) not found for team {Name}: {ex.Message}");
+            Chassis = null;
+        }
+
+        try
+        {
+            Motor = RacingLibrary.GetMotorById(IdMotor, ref info);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Motor (ID: {IdMotor}) not found for team {Name}: {ex.Message}");
+            Motor = null;
+        }
     }
     public float GetGeneral()
     {
-        return (Motor.GetGeneral() + Chassis.GetGeneral())/2f; 
+        if(Motor != null && Chassis != null)
+            return (Motor.GetGeneral() + Chassis.GetGeneral())/2f; 
+        return 0f;
+        
+    }
+    public int GetSeasonPoint()
+    {
+        if(Driver1 == null || Driver2 == null)
+        {
+             Console.WriteLine("Drivers are null");
+             return 0;
+        }
+        return Driver1.seasonStat.seasonPoint + Driver2.seasonStat.seasonPoint;
+    }
+
+    public static float GetMaxTurnPoint()
+    {
+        return (99f * chassisStabilityTurnCoeff + 99f * chassisAeroTurnCoeff) / (chassisStabilityTurnCoeff+chassisAeroTurnCoeff);
+    }
+    public static float GetMaxLinePoint()
+    {
+        return (99f*motorPowerCoeff + 99f*chassisAeroLineCoeff)/(motorPowerCoeff + chassisAeroLineCoeff);
     }
     public float GetTurnPoint()
     {
-        return (Chassis.Stability*1.25f + Chassis.Aero * 0.25f)/1.5f; 
+        if(Chassis != null)
+            return (Chassis.Stability*chassisStabilityTurnCoeff + Chassis.Aero * chassisAeroTurnCoeff) / (chassisStabilityTurnCoeff +chassisAeroTurnCoeff); 
+        return 0f;
     }
     public float GetLinePoint()
     {
-        return (Motor.Power*1.25f + Chassis.Aero * 1.25f)/2.5f; 
+        if(Motor != null && Chassis != null)
+            return (Motor.Power*motorPowerCoeff + Chassis.Aero * chassisAeroLineCoeff)/(motorPowerCoeff+chassisAeroLineCoeff);
+        return 0f;
     }
     public override string ToString()
     {
-        return Id + " : " + Name +"," + Chassis.Id + "," + Motor.Id; 
+        return Id + " : " + Name +"," + IdChassis + "," + IdMotor + ",Driver " + IdDriver1 + "/"+IdDriver2; 
     }
 
+    public string UpdateRowString()
+    {
+        return  "idPilot1 = " + IdDriver1 +
+                ", idPilot2 = " + IdDriver2 +
+                ", idChassis = " + IdChassis +
+                ", idMotor = " + IdMotor;
+    }
 }

@@ -1,10 +1,10 @@
 using System.Reflection;
 
-public static class MyAppLibrary
+public static class RacingLibrary
 {
     static Random rand = new Random();
     public static string BASEFILE = System.IO.Directory.GetCurrentDirectory();
-    public static string SAVEFILE = BASEFILE + "/Saves";
+    public static string SAVEFILE = BASEFILE + "\\Saves";
     public static float GetRandomFloat(float minValue, float maxValue)
     {
         if (minValue > maxValue)
@@ -28,31 +28,31 @@ public static class MyAppLibrary
         switch(dayForm)
         {
             case -3:
-                minValue = MyAppLibrary.GetRandomInt(-5,-4);
+                minValue = RacingLibrary.GetRandomInt(-5,-4);
                 maxValue= minValue + 1;
             break;
             case -2:
-                minValue = MyAppLibrary.GetRandomInt(-4,-2);
+                minValue = RacingLibrary.GetRandomInt(-4,-2);
                 maxValue= minValue + 1;
             break;
             case -1:
-                minValue = MyAppLibrary.GetRandomInt(-2,0);
+                minValue = RacingLibrary.GetRandomInt(-2,0);
                 maxValue= minValue + 1;
             break;
             case 0:
-                minValue = MyAppLibrary.GetRandomInt(-1,1);
+                minValue = RacingLibrary.GetRandomInt(-1,1);
                 maxValue= minValue + 1;
             break;
             case 1:
-                minValue = MyAppLibrary.GetRandomInt(0,2);
+                minValue = RacingLibrary.GetRandomInt(0,2);
                 maxValue= minValue + 1;
             break;
             case 2:
-                minValue = MyAppLibrary.GetRandomInt(1,3);
+                minValue = RacingLibrary.GetRandomInt(1,3);
                 maxValue= minValue + 1;
             break;
             case 3:
-                minValue = MyAppLibrary.GetRandomInt(3,4);
+                minValue = RacingLibrary.GetRandomInt(3,4);
                 maxValue= minValue + 1;
             break;
             default:
@@ -77,7 +77,7 @@ public static class MyAppLibrary
     public static int GetIntInput()
     {
         string? input = Console.ReadLine();
-        int inputConvert = MyAppLibrary.ConvertStringToInt(input);
+        int inputConvert = RacingLibrary.ConvertStringToInt(input);
         return inputConvert;
     }
 
@@ -91,9 +91,9 @@ public static class MyAppLibrary
         return true;
     }
 
-    public static Driver GetDriverById(int id)
+    public static Driver GetDriverById(int id,ref Info info)
     {
-        foreach(Driver driver in GameManager.instance.driversList)
+        foreach(Driver driver in info.driversList)
         {
             if(driver.Id == id)
             {
@@ -102,9 +102,9 @@ public static class MyAppLibrary
         }
         throw new Exception("Not driver found");
     }
-    public static Motor GetMotorById(int id)
+    public static Motor GetMotorById(int id,ref Info info)
     {
-        foreach(Motor motor in GameManager.instance.motorList)
+        foreach(Motor motor in info.motorList)
         {
             if(motor.Id == id)
             {
@@ -114,9 +114,9 @@ public static class MyAppLibrary
         throw new Exception("Not motor found");
     }
 
-    public static Chassis GetChassisById(int id)
+    public static Chassis GetChassisById(int id,ref Info info)
     {
-        foreach(Chassis chassis in GameManager.instance.chassisList)
+        foreach(Chassis chassis in info.chassisList)
         {
             if(chassis.Id == id)
             {

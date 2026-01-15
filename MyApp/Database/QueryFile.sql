@@ -43,13 +43,26 @@ CREATE TABLE grandprix(
 );
 
 
-
-
+*/
+/*
 INSERT INTO grandprix(name,location,length,nb_turn,max_turn) 
 VALUES
-('Grand Prix automobile de Grande-Bretagne','Silverstone','5.891','18','52'),
-('Grand Prix automobile de Italie', 'Monza','5.793','11','53'),
-('Grand Prix automobile de Monaco','Monaco','3.337','18','78');
+--('Grand Prix automobile de Grande-Bretagne','Silverstone','5.891','18','52'),
+--('Grand Prix automobile de Italie', 'Monza','5.793','11','53'),
+--('Grand Prix automobile de Monaco','Monaco','3.337','18','78');
+('Grand Prix automobile de France','Castellet','5.842','15','53'),
+('Grand Prix automobile de Allemagne','Hockenheim','4.574','13','67'),
+('Grand Prix automobile de Espagne','Madrid','5.474','22','55'),
+('Grand Prix automobile de Autriche','Zeltweg','4.318','10','71'),
+('Grand Prix automobile de Belgique','Spa Francorchamps','7.004','20','44'),
+('Grand Prix automobile de Brésil','Sao Paulo','4.309','15','69'),
+('Grand Prix automobile de Etats-Unis','Austin','5.513','20','56'),
+('Grand Prix automobile de Canada','Montréal','4.361','13','70'),
+('Grand Prix automobile de Chine','Shangai','5.451','16','56'),
+('Grand Prix automobile de Qatar','Loasail','5.380','16','57'),
+('Grand Prix automobile de Arabie Saoudite','Djeddah','6.175','27','50'),
+('Grand Prix automobile de Japon','Suzuka','5.807','17','53'),
+('Grand Prix automobile de Australie','Albert Park','5.278','16','58');
 */
 --INSERT INTO drivers(firstname,lastname,birthdate,s_turn,s_break,s_overtake,s_defense,s_tyrecontrol)
 --VALUES
@@ -112,3 +125,30 @@ VALUES
     --('Atlassian Williams F1 Team','22','23','9','1');
     --('Revolut Audi F1 Team','24','25','10','5');
     --('Cadillac Formula 1 Team','26','27','11','2');
+
+
+SELECT sqlite_version();
+/*ALTER TABLE grandprix
+DROP COLUMN division_racing;
+
+ALTER TABLE grandprix
+ADD COLUMN f1_racing BOOLEAN NOT NULL DEFAULT TRUE;
+
+ALTER TABLE grandprix
+ADD COLUMN f2_racing BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE grandprix
+ADD COLUMN f3_racing BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE grandprix
+ADD COLUMN fe_racing BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE grandprix
+ADD COLUMN facademy_racing BOOLEAN NOT NULL DEFAULT FALSE;*/
+
+--UPDATE  grandprix 
+--SET  division_racing = division_racing || 'F2'
+--WHERE id = '3';
+UPDATE drivers 
+SET s_turn = '51', s_break = '50', s_overtake = '50', s_defense = '50', s_tyrecontrol = '50' 
+WHERE ID = '49';

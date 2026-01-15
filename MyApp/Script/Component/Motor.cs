@@ -19,6 +19,7 @@ public class Motor : Component
     public float GetGeneral() => (Power + Fiability)/2f;
     public override string ToString()
     {
-        throw new NotImplementedException();
+        return $"{Id}: {Name} - Power: {Power}, Fiability: {Fiability}";
     }
+
 };

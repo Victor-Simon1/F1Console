@@ -1,40 +1,92 @@
 using System.Text.Json.Serialization;
 using Microsoft.Data.Sqlite;
 
-public class  Driver : Component
+
+public class  Driver : Component,IUpdatable
 {
-    private enum E_DriverStats : int
+    private enum EDriverStats : int
     {
         TURN = 0,
-        BREAK = 1,
-        OVERTAKE = 2,
-        DEFENSE = 3,
-        TYRECONTROL = 4,
-        MAX = 5
+        BREAK ,
+        OVERTAKE ,
+        DEFENSE ,
+        TYRECONTROL ,
+        REGULARITY ,
+        REACTIVITY,
+        MAX
     };
+    public enum ESexe
+    {
+        Men,
+        Women
+    };
+    public struct SeasonStat
+    {
+        public int seasonPoint =0;
+        public int nbDnf =0;
+
+        public float sumPlace = 0f;
+        public int nbRaceMake = 0;
+        public SeasonStat(){}
+        public new string ToString()
+        {
+            float avgPlace = 0;
+            if(nbRaceMake != 0)
+                avgPlace = sumPlace / nbRaceMake;
+            string seasonPointStr = ("| "+seasonPoint + " ").PadRight(StringRacing.PadRightSeason);
+            string nbDnfStr = ("| "+ nbDnf + " ").PadRight(StringRacing.PadRightSeason);
+            string avgPlaceStr = ("| "+ avgPlace+ " ").PadRight(StringRacing.PadRightSeason);
+            return seasonPointStr + nbDnfStr + avgPlaceStr; 
+        }
+    }
+    public struct RaceStat
+    {
+        public int dayForm = 0;
+        public float racePoints = 0;
+        public bool hasDNF = false;
+        public float[] penaltyPoint = new float[(int)EEventType.MAX_EVENT];
+        public int[] driverForm = new int[(int)EDriverStats.MAX];
+        public RaceStat(){}
+
+        public void Reset()
+        {
+            dayForm = 0;
+            racePoints = 0;
+            hasDNF = false;
+            for(int i = 0; i<penaltyPoint.Length;i++)
+            {
+                penaltyPoint[i] = 0;
+            }
+        }
+    }
+    
     public static string READDB => "SELECT * FROM drivers";
-    [JsonInclude]
-    public int Id{get;set;}
+    public int Id { get ; set; }
     public string? FirstName{get;set;}
     public string? LastName {get;set;}
     public string? Birthdate{get;set;}
+    public ESexe driverSexe{get;set;}
 
     //Statistic
+    public int potential;
+    public int[] driverStats = new int[(int)EDriverStats.MAX];
 
-    public int[] driverStats = new int[(int)E_DriverStats.MAX];
-    public int[] driverForm = new int[(int)E_DriverStats.MAX];
-    public static float[] driverCoeff = new float[(int)E_DriverStats.MAX];
+    public static float[] driverTurnCoeff = {1.2f,1.8f,0.25f,1f,0.1f,0.1f,0.7f};
+    public static float[] driverLineCoeff = {0.05f,0.2f,1.7f,1.6f,1.5f,.1f,0.5f};
     //Race Variable
-    [JsonIgnore]
-    public int dayForm;
-    [JsonIgnore]
-    public float racePoints;
+    public RaceStat raceStat = new RaceStat();
     //Carreer Variable
-    [JsonInclude]
-    public int seasonPoint;
+    public SeasonStat seasonStat = new SeasonStat();
+    //const variable
+    const float turnDriverCoeff = 0.7f;
+    const float turnTeamCoeff = 0.5f;
+    const float lineDriverCoeff = 0.4f;
+    const float lineTeamCoeff = 1.7f;
 
+    #region INIT_FUNCTION
     public void LoadData(SqliteDataReader reader)
     {
+        //Console.WriteLine("LoadData");
         Id = reader.GetInt32(0);
         FirstName = reader.GetString(1);
         LastName = reader.GetString(2);
@@ -42,98 +94,177 @@ public class  Driver : Component
 
         //Stats
 
-        driverStats[(int)E_DriverStats.TURN] = reader.GetInt32(4);
-        driverStats[(int)E_DriverStats.BREAK] = reader.GetInt32(5);
-        driverStats[(int)E_DriverStats.OVERTAKE] = reader.GetInt32(6);
-        driverStats[(int)E_DriverStats.DEFENSE] = reader.GetInt32(7);
-        driverStats[(int)E_DriverStats.TYRECONTROL] = reader.GetInt32(8);
+        driverStats[(int)EDriverStats.TURN] = reader.GetInt32(4);
+        driverStats[(int)EDriverStats.BREAK] = reader.GetInt32(5);
+        driverStats[(int)EDriverStats.OVERTAKE] = reader.GetInt32(6);
+        driverStats[(int)EDriverStats.DEFENSE] = reader.GetInt32(7);
+        driverStats[(int)EDriverStats.TYRECONTROL] = reader.GetInt32(8);
+
+        potential = reader.GetInt32(9);
+
+        driverStats[(int)EDriverStats.REGULARITY] = reader.GetInt32(10);
+        driverStats[(int)EDriverStats.REACTIVITY] = reader.GetInt32(11);
     }
 
-    public static void SetCoeff()
-    {
-        driverCoeff[(int)E_DriverStats.TURN] = 1.2f;
-        driverCoeff[(int)E_DriverStats.BREAK] = 1.8f;
-        driverCoeff[(int)E_DriverStats.OVERTAKE] = 0.25f;
-        driverCoeff[(int)E_DriverStats.DEFENSE] = 0.45f;
-        driverCoeff[(int)E_DriverStats.TYRECONTROL] = 0.75f;
-    }
-
+    #endregion
+    #region RACE_FUNCTION
     public void CalculDayForm()
     {
-        dayForm = MyAppLibrary.GetRandomInt(-3,3);
+        raceStat.dayForm = MathRacing.GetNumber(driverStats[(int)EDriverStats.REGULARITY]);
         int minValue,maxValue;
-        MyAppLibrary.SetMinMaxFormAccordingDayForm(dayForm,out minValue,out maxValue);
-        driverForm[(int)E_DriverStats.TURN] = MyAppLibrary.GetRandomInt(minValue,maxValue);
-        driverForm[(int)E_DriverStats.BREAK] = MyAppLibrary.GetRandomInt(minValue,maxValue);
-        driverForm[(int)E_DriverStats.OVERTAKE] = MyAppLibrary.GetRandomInt(minValue,maxValue);
-        driverForm[(int)E_DriverStats.DEFENSE] = MyAppLibrary.GetRandomInt(minValue,maxValue);
-        driverForm[(int)E_DriverStats.TYRECONTROL] = MyAppLibrary.GetRandomInt(minValue,maxValue);
+        RacingLibrary.SetMinMaxFormAccordingDayForm(raceStat.dayForm,out minValue,out maxValue);
+        for(int indexStat = 0;indexStat < (int)EDriverStats.MAX;indexStat++)
+            raceStat.driverForm[(int)indexStat] = RacingLibrary.GetRandomInt(minValue,maxValue);
     }
-    public override string ToString()
+    public void ResetRaceVariable( )
     {
-        return  Id + " : " + FirstName + " " + LastName + " birth at "  +Birthdate ;
+        if(raceStat.hasDNF)
+            seasonStat.nbDnf++;
+        
+        raceStat.Reset();
     }
-    public float GetGeneral()
+    private float CalculatePoint(float[] array,bool isMax = true)
     {
-        float general = 0f;
-        for (int i = 0; i < (int)E_DriverStats.MAX; i++)
+        float maxPoint = 0f;
+        float divisor = 0f;
+        float stat = 99f;
+        for(int i = 0; i < array.Length; i++)
         {
-            general += driverStats[i];
+            if(!isMax)
+                stat = driverStats[i] + raceStat.driverForm[i];
+            maxPoint += stat * array[i];
+            divisor += array[i];
         }
-        return general / (float)E_DriverStats.MAX; 
+           
+        return  maxPoint/divisor;
+    } 
+    private float CalculateMaxTurnPoint()
+    {
+        return CalculatePoint(driverTurnCoeff);
     }
-
+    private float CalculateMaxLinePoint()
+    {
+        return  CalculatePoint(driverLineCoeff);
+    }
     public static float CalculMaxPoints(int nbTurn, float length)
     {
-        float random = 1.4f;
-        float turnPoint = nbTurn * /*team.GetTurnPoint()* */ 
-            (99f * driverCoeff[(int)E_DriverStats.TURN]+ 
-            99f * driverCoeff[(int)E_DriverStats.BREAK]);
-        float linePoint = (99f *  driverCoeff[(int)E_DriverStats.OVERTAKE]+ 
-                99f * driverCoeff[(int)E_DriverStats.TYRECONTROL]+ 
-                99f  * driverCoeff[(int)E_DriverStats.DEFENSE])  
-                /*team.GetLinePoint()*/;
-        return   (float)( turnPoint+linePoint )* length * random;
+        Driver driver = new Driver();
+        float turnPoint = nbTurn * (driver.CalculateMaxTurnPoint()*turnDriverCoeff+ Team.GetMaxTurnPoint() * turnTeamCoeff) / (turnDriverCoeff+turnTeamCoeff);
+        float linePoint = length* (driver.CalculateMaxLinePoint()*lineDriverCoeff + Team.GetMaxLinePoint() * lineTeamCoeff) / (lineDriverCoeff+lineTeamCoeff); 
+        return (float)( turnPoint + linePoint ) / 2f;
     }
 
-    private float GetStat(E_DriverStats stat)
+    private float CalculateTurnPoint()
     {
-        return (driverStats[(int)stat]+driverForm[(int)stat])* driverCoeff[(int)stat];
+        return CalculatePoint(driverTurnCoeff,false);
+    }
+    private float CalculateLinePoint()
+    {
+        return CalculatePoint(driverLineCoeff,false);
     }
     public float CalculatePointPerTours(int nbTurn, float length,Team team)
     {
-        //float random = MyAppLibrary.GetRandomFloat(0.8f,1.4f);
-        float turnPoint = /*nbTurn */ ((GetStat(E_DriverStats.TURN) + GetStat(E_DriverStats.BREAK)
-                                /(driverCoeff[(int)E_DriverStats.TURN] + driverCoeff[(int)E_DriverStats.BREAK]))*0.75f
-                                + team.GetTurnPoint() *1.5f)/2.25f  ;  
-        float linePoint = /*length */ ((team.GetLinePoint() *1.5f) + 
-                        ((GetStat(E_DriverStats.OVERTAKE) + GetStat(E_DriverStats.DEFENSE) + GetStat(E_DriverStats.TYRECONTROL))/
-                         (driverCoeff[(int)E_DriverStats.OVERTAKE] + driverCoeff[(int)E_DriverStats.DEFENSE] + driverCoeff[(int)E_DriverStats.TYRECONTROL]))
-                         *0.75f)/2.25f  ; 
+        float turnPoint = nbTurn * ( CalculateTurnPoint() * turnDriverCoeff + team.GetTurnPoint() * turnTeamCoeff) / (turnDriverCoeff + turnTeamCoeff);  
+        float linePoint = length * (CalculateLinePoint() * lineDriverCoeff + team.GetLinePoint() * lineTeamCoeff ) / (lineDriverCoeff +lineTeamCoeff); 
 
-        float actualTurnPoint =  (float)( turnPoint+linePoint )/2f;
-        racePoints +=actualTurnPoint;
-        return actualTurnPoint/* random*/;
+        float actualTurnPoint =  (float)(turnPoint + linePoint) / 2f;
+        foreach(float penality in raceStat.penaltyPoint)
+            actualTurnPoint -= actualTurnPoint * penality;
+        raceStat.racePoints +=actualTurnPoint;
+        return actualTurnPoint;
     }
-   /* public sealed class DriverData : Data
-    {
-       
-        [JsonInclude]
-        int seasonPoint{get;set;}
-        public DriverData(int _id,int _seasonPoint)
-        { 
-            Id = _id;
-            seasonPoint = _seasonPoint;
-        }
-        public override string ToString()
-        {
-            return Id + " : " + seasonPoint;
-        }
-    }*/
-    //public Data ConvertToData()
-    //{
-    //    return new DriverData(Id,seasonPoint);
-   // }
 
- 
+
+    public void TriggerEvent(EEventType EEventType)
+    {
+        switch(EEventType)
+        {
+            case EEventType.DNF:
+                raceStat.hasDNF = true;
+                break;
+            case EEventType.TYRE_FLAT:
+                raceStat.penaltyPoint[(int)EEventType.TYRE_FLAT] = 0.3f;
+                break;
+            case EEventType.DAMAGE_PLANKS:
+                raceStat.penaltyPoint[(int)EEventType.DAMAGE_PLANKS] = 0.1f;
+                break;
+            case EEventType.DAMAGE_WINGS:
+                raceStat.penaltyPoint[(int)EEventType.DAMAGE_WINGS] = 0.1f;
+                break;
+            default :
+                Console.WriteLine("Error : EEventType not recognize");
+            break;
+        }
+    }
+    #endregion
+
+    #region CAREER_FUNCTION
+    public void UpdateStats()
+    {
+        int update = 0;
+        int age = BirthdateToAge();
+        if(age>34)
+            update = -1;
+        else if(age <25 && GetGeneral() < potential)
+            update = 1;
+        for(int i = 0;i<(int)EDriverStats.MAX;i++)
+            driverStats[i] += update;
+        if(update != 0)
+            Console.WriteLine("Le pilote " + LastName + " a changé de notes");
+    }
+    public int BirthdateToAge()
+    {
+        if (string.IsNullOrEmpty(Birthdate))
+        {
+            Console.WriteLine($"Warning: Birthdate is null or empty for driver {GetName()}");
+            return 0;
+        }
+
+        if (GameManager.instance == null)
+        {
+            Console.WriteLine($"Warning: GameManager.instance is null");
+            return 0;
+        }
+
+        var dateTime = DateTime.Parse(Birthdate);
+        int age = GameManager.instance.baseYear.Year - dateTime.Year;
+        if(dateTime.Date > GameManager.instance.baseYear.AddYears(-age))
+            age--;
+        return age;
+    }
+    #endregion
+    #region TOSTRING
+    public override string ToString()
+    {
+        return  Id + " : " + FirstName + " " + LastName + " birth at "  +Birthdate  +" : " + seasonStat.seasonPoint;
+    }
+    public string ToStringSeason()
+    {
+        return seasonStat.ToString();
+    }
+
+    public string GetName()
+    {
+        return FirstName + " " + LastName;
+    }
+    #endregion
+
+    public float GetGeneral()
+    {
+        float general = 0f;
+        for (int i = 0; i < (int)EDriverStats.MAX; i++)
+        {
+            general += driverStats[i];
+        }
+        return general / (float)EDriverStats.MAX; 
+    }
+
+    public string UpdateRowString()
+    {
+        return  "s_turn = '" + driverStats[(int)EDriverStats.TURN] + 
+                "', s_break = '" + driverStats[(int)EDriverStats.BREAK] +
+                "', s_overtake = '" + driverStats[(int)EDriverStats.OVERTAKE] +
+                "', s_defense = '" + driverStats[(int)EDriverStats.DEFENSE] +
+                "', s_tyrecontrol = '" + driverStats[(int)EDriverStats.TYRECONTROL] +"'" ;
+    }
 };

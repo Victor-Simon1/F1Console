@@ -6,7 +6,7 @@ public class  Chassis : Component
 
     public int Id{get;set;}
     public string? Name{get;set;}
-    public int Aero{get;set;}
+    public int Aero{get;set;} 
     public int Stability{get;set;}
     public void LoadData(SqliteDataReader reader)
     {
@@ -18,6 +18,6 @@ public class  Chassis : Component
     public float GetGeneral() => (Aero + Stability)/2f;
     public override string ToString()
     {
-        throw new NotImplementedException();
+        return $"{Id}: {Name} - Aero: {Aero}, Stability: {Stability}";
     }
 };

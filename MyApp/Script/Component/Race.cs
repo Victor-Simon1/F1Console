@@ -11,7 +11,7 @@ public class  Race : Component
     public int NbTurn{get;set;}
     public int MaxTour{get;set;}
     public int IdType{get;set;}
-
+    public List<EDivisionType> divisionRacing = new List<EDivisionType>();
 
     public void StartRace()
     {
@@ -27,7 +27,14 @@ public class  Race : Component
         Length = reader.GetFloat(3);
         NbTurn = reader.GetInt32(4);
         MaxTour = reader.GetInt32(5);
-
+        Console.WriteLine("Div" +reader.GetInt32(6) );
+        for(int i = 0;i<(int)EDivisionType.MAX;i++)
+        {
+            bool isRacing = reader.GetBoolean(6+i);
+            if(isRacing)
+                divisionRacing.Add((EDivisionType)i);
+        }
+     
     }
 
     public override string ToString()

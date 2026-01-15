@@ -20,95 +20,127 @@ public class DatabaseHandler
 #region MODIFDB
     private void ModifyDatabase()
     {
+        if (parent?.database == null)
+        {
+            Console.WriteLine("Database is not initialized");
+            return;
+        }
+
         int input = SelectActions();
-        Console.WriteLine("INput :" + input);
-        Console.WriteLine("INput :" + allfiles[input]);
+        if (input < 0 || input >= allfiles.Length)
+        {
+            Console.WriteLine("Invalid database selection");
+            return;
+        }
+
+        Console.WriteLine("Selected database: " + allfiles[input]);
         parent.database.CurrentDatabaseName = allfiles[input];
         parent.database.LoadDatabase();
         EDBMode mode = SelectModification();
         parent.database.GetTables();
-        Console.WriteLine("Mode  :" + mode);
+        Console.WriteLine("Mode: " + mode);
 
         input = SelectTable();
-        Console.WriteLine("INput :" + input);
-        Console.WriteLine("INput :" + parent.database.tablesNameList[input]);
+        if (input < 0 || input >= parent.database.tablesNameList.Count)
+        {
+            Console.WriteLine("Invalid table selection");
+            return;
+        }
+
+        Console.WriteLine("Selected table: " + parent.database.tablesNameList[input]);
         parent.database.CurrentTableName = parent.database.tablesNameList[input];
 
         switch(mode)
         {
             case EDBMode.ADD:
-                parent.database.GetColumnNames();
-                var entry = "(";
-                for(int i = 1;i< parent.database.columnsNameList.Count; i++)
-                {
-                    entry += parent.database.columnsNameList[i];
-                    if(i != parent.database.columnsNameList.Count-1)
-                        entry += ",";
-                }
-                    
-                entry += ")";
-                Console.WriteLine("Column :" + entry);
-                bool isAdding = true;
-                while(isAdding)
-                {
-                    string? minput = Console.ReadLine();
-                    int minputInt = 0;
-                    Console.WriteLine("Input : " + minput );
-                    try
-                    { 
-                        minputInt = MyAppLibrary.ConvertStringToInt(minput);   
-                    }
-                    catch(Exception e)
-                    {
-                        Console.WriteLine(e.ToString());
-                    }
-                    if(minputInt == -1)
-                        isAdding = false;
-                    else
-                        parent.database.InsertRowInTable(parent.database.CurrentTableName, entry,minput);
-                }
-            break;
+                HandleAddMode();
+                break;
             case EDBMode.DELETE:
-                parent.database.ShowTable(parent.database.CurrentTableName);
-                Console.WriteLine("Enter an ID to delete, -1 to quit");
-                try
-                {
-                    input =  MyAppLibrary.GetIntInput();
-                    while(input != -1)
-                    {
-                        parent.database.DeleteRow(parent.database.CurrentTableName,input.ToString());
-                        Console.WriteLine("Enter an ID to delete, -1 to quit");
-                        input = MyAppLibrary.GetIntInput();
-                    }
-                    
-                    
-                }
-                catch(Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-                
-                
-            break;
+                HandleDeleteMode();
+                break;
             default:
-                Console.WriteLine("Entry not recognize");
-            break;
+                Console.WriteLine("Entry not recognized");
+                break;
+        }
+    }
 
+    private void HandleAddMode()
+    {
+        if (parent?.database == null)
+            return;
+
+        parent.database.GetColumnNames();
+        if (parent.database.columnsNameList.Count <= 1)
+        {
+            Console.WriteLine("No columns available to add");
+            return;
         }
 
+        // Construire la liste des noms de colonnes (sauf ID)
+        var columnNames = string.Join(", ", parent.database.columnsNameList.Skip(1));
+        Console.WriteLine("Columns: " + columnNames);
+        Console.WriteLine("Enter values separated by commas (or -1 to quit):");
+
+        bool isAdding = true;
+        while(isAdding)
+        {
+            string? input = Console.ReadLine();
+            if (string.IsNullOrEmpty(input))
+                continue;
+
+            int inputInt = RacingLibrary.ConvertStringToInt(input);
+            if(inputInt == -1)
+            {
+                isAdding = false;
+                continue;
+            }
+
+            // Parser les valeurs séparées par des virgules
+            string[] values = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (values.Length != parent.database.columnsNameList.Count - 1)
+            {
+                Console.WriteLine($"Expected {parent.database.columnsNameList.Count - 1} values, got {values.Length}");
+                continue;
+            }
+
+            parent.database.InsertRowInTable(parent.database.CurrentTableName, columnNames, values);
+        }
+    }
+
+    private void HandleDeleteMode()
+    {
+        if (parent?.database == null)
+            return;
+
+        parent.database.ShowTable(parent.database.CurrentTableName);
+        Console.WriteLine("Enter an ID to delete, -1 to quit");
+        
+        int input = RacingLibrary.GetIntInput();
+        while(input != -1)
+        {
+            parent.database.DeleteRow(parent.database.CurrentTableName, input);
+            Console.WriteLine("Enter an ID to delete, -1 to quit");
+            input = RacingLibrary.GetIntInput();
+        }
     }
     private int SelectActions()
     {
-        Console.WriteLine("Choose an actions ! ");
+        Console.WriteLine("Choose an action!");
         Console.WriteLine("1 : Modify a database");
-        //Console.WriteLine("2 : Create a new database");
         GetDatabases();
-        int input = MyAppLibrary.GetIntInput();
-        bool goodEntry = MyAppLibrary.VerifyInput(input,0,allfiles.Length,"TODO");
+        
+        if (allfiles == null || allfiles.Length == 0)
+        {
+            Console.WriteLine("No databases found");
+            return -1;
+        }
+
+        int input = RacingLibrary.GetIntInput();
+        bool goodEntry = RacingLibrary.VerifyInput(input, 0, allfiles.Length, "Invalid database selection");
         while(!goodEntry)
         {
-            input = MyAppLibrary.GetIntInput();
-            goodEntry = MyAppLibrary.VerifyInput(input,0,allfiles.Length,"TODO");
+            input = RacingLibrary.GetIntInput();
+            goodEntry = RacingLibrary.VerifyInput(input, 0, allfiles.Length, "Invalid database selection");
         }
         return input;
     }
@@ -119,28 +151,34 @@ public class DatabaseHandler
         Console.WriteLine("1 : ADD ");
         Console.WriteLine("2 : DELETE");
 
-        EDBMode mode = (EDBMode)MyAppLibrary.GetIntInput();
-        bool goodEntry = MyAppLibrary.VerifyInput((int)mode,0,(int)EDBMode.MAX,"TODO");
+        EDBMode mode = (EDBMode)RacingLibrary.GetIntInput();
+        bool goodEntry = RacingLibrary.VerifyInput((int)mode,0,(int)EDBMode.MAX,"TODO");
         while(!goodEntry)
         {
-            mode = (EDBMode)MyAppLibrary.GetIntInput();
-            goodEntry = MyAppLibrary.VerifyInput((int)mode,0,(int)EDBMode.MAX,"TODO");
+            mode = (EDBMode)RacingLibrary.GetIntInput();
+            goodEntry = RacingLibrary.VerifyInput((int)mode,0,(int)EDBMode.MAX,"TODO");
         }
         return mode;
     }
 
     private int SelectTable()
     {
+        if (parent?.database == null)
+        {
+            Console.WriteLine("Database is not initialized");
+            return -1;
+        }
+
         Console.WriteLine("Choose a table");
         for (int i = 0; i < parent.database.tablesNameList.Count; i++)
             Console.WriteLine(i + " : " + parent.database.tablesNameList[i]);    
         
-        int input = MyAppLibrary.GetIntInput();
-        bool goodEntry = MyAppLibrary.VerifyInput(input,0,parent.database.tablesNameList.Count,"TODO");
+        int input = RacingLibrary.GetIntInput();
+        bool goodEntry = RacingLibrary.VerifyInput(input, 0, parent.database.tablesNameList.Count, "Invalid table selection");
         while(!goodEntry)
         {
-            input = MyAppLibrary.GetIntInput();
-            goodEntry = MyAppLibrary.VerifyInput(input,0,parent.database.tablesNameList.Count,"TODO");
+            input = RacingLibrary.GetIntInput();
+            goodEntry = RacingLibrary.VerifyInput(input, 0, parent.database.tablesNameList.Count, "Invalid table selection");
         }
         return input;
     }
@@ -149,7 +187,7 @@ public class DatabaseHandler
         Console.WriteLine("Select a mode !");
         Console.WriteLine("0 : Modify !");
         Console.WriteLine("1 : Create !");
-        int input = MyAppLibrary.GetIntInput();
+        int input = RacingLibrary.GetIntInput();
         switch(input)
         {
             case (int)EDBActions.MODIFY:
