@@ -22,12 +22,7 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
     public int IdDriver2{get;set;}
 
     public EDivisionType divison;
-    //const variable
 
-    private const float chassisStabilityTurnCoeff = 1.25f;
-    private const float chassisAeroTurnCoeff = 0.25f;
-    private const float motorPowerCoeff = 2.5f;
-    private const float chassisAeroLineCoeff = 1.25f;
 
     public void LoadData(SqliteDataReader reader)
     {
@@ -102,21 +97,6 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
         return Driver1.seasonStat.seasonPoint + Driver2.seasonStat.seasonPoint;
     }
 
-    private float CalculatePoint(float[] arrayCoeef,float[] arrayStat,bool isMax = true)
-    {
-        float maxPoint = 0f;
-        float divisor = 0f;
-        float stat = 99f;
-        for(int i = 0; i < arrayCoeef.Length; i++)
-        {
-            if(!isMax)
-                stat = arrayStat[i];
-            maxPoint += stat * arrayCoeef[i];
-            divisor += arrayCoeef[i];
-        }
-           
-        return maxPoint / divisor;
-    } 
 
     public float CalculateTurnPoint()
     {
@@ -130,7 +110,7 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
             RacingLogger.Error($"Motor of team {Name} is null");
             return 0f;
         }
-        return Chassis.CalculateTurnPoint() + Motor.CalculateTurnPoint();
+        return (Chassis.CalculateTurnPoint() + Motor.CalculateTurnPoint()) / 2f;
     }
     public float CalculateLinePoint()
     {
@@ -144,7 +124,7 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
             RacingLogger.Error($"Motor of team {Name} is null");
             return 0f;
         }
-        return Chassis.CalculateLinePoint() + Motor.CalculateLinePoint();
+        return (Chassis.CalculateLinePoint() + Motor.CalculateLinePoint()) / 2f;
     }
 
     public override string ToString()
@@ -160,13 +140,4 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
                 ", idMotor = " + IdMotor;
     }
 
-    /*float IRaceAble.CalculateTurnPoint()
-    {
-        return CalculateTurnPoint();
-    }
-
-    float IRaceAble.CalculateLinePoint()
-    {
-        return CalculateLinePoint();
-    }*/
 }

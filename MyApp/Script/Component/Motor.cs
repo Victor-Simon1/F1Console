@@ -13,8 +13,8 @@ public class Motor : Component,IRaceAble
     public int Id{get;set;}
     public string? Name{get;set;}
     private int[] statistics = new int[(int)EMotorStats.MAX];
-    private float[] turnCoeff = new float[(int)EMotorStats.MAX];
-    private float[] lineCoeff = new float[(int)EMotorStats.MAX];
+    private float[] turnCoeff = {1f,0f};
+    private float[] lineCoeff = {1f,0f};
     public void LoadData(SqliteDataReader reader)
     {
         Id = reader.GetInt32(0);
@@ -50,6 +50,6 @@ public class Motor : Component,IRaceAble
     public float CalculateLinePoint()
     {
         IRaceAble raceAble = this;
-        return raceAble.CalculatePoint(turnCoeff,statistics);
+        return raceAble.CalculatePoint(lineCoeff,statistics);
     }
 }

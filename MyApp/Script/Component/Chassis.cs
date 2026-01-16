@@ -13,8 +13,8 @@ public class  Chassis : Component,IRaceAble
     public int Id{get;set;}
     public string? Name{get;set;}
     private int[] statistics = new int[(int)EChassisStats.MAX];
-    private float[] turnCoeff = new float[(int)EChassisStats.MAX];
-    private float[] lineCoeff = new float[(int)EChassisStats.MAX];
+    private float[] turnCoeff = {0.25f,1.25f};
+    private float[] lineCoeff = {2.25f,.75f};
     public void LoadData(SqliteDataReader reader)
     {
         Id = reader.GetInt32(0);
