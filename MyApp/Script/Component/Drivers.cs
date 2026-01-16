@@ -33,9 +33,9 @@ public class  Driver : Component,IUpdatable,IRaceAble
             float avgPlace = 0;
             if(nbRaceMake != 0)
                 avgPlace = sumPlace / nbRaceMake;
-            string seasonPointStr = ("| "+seasonPoint + " ").PadRight(StringRacing.PadRightSeason);
-            string nbDnfStr = ("| "+ nbDnf + " ").PadRight(StringRacing.PadRightSeason);
-            string avgPlaceStr = ("| "+ avgPlace+ " ").PadRight(StringRacing.PadRightSeason);
+            string seasonPointStr = (seasonPoint + " ").PadRight(StringRacing.PadRightSeason);
+            string nbDnfStr =       (" | " + nbDnf + " ").PadRight(StringRacing.PadRightSeason);
+            string avgPlaceStr =    (" | "+ avgPlace + " ").PadRight(StringRacing.PadRightSeason);
             return seasonPointStr + nbDnfStr + avgPlaceStr; 
         }
     }

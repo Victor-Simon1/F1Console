@@ -149,14 +149,10 @@ public class CarrerHandler
         RaceHandler raceHandler = new RaceHandler(ref info,ref pointSystem);
 
         raceHandler.SetRace(indexRace);
-        //raceHandler.SetInfo(info.driversList,info.teamsList);
+
         for(int division = 0; division<(int)EDivisionType.MAX;division++)
             raceHandler.StartSimulation((EDivisionType)division);
         
-        //raceHandler.SetChampionshipPoint();
-        //raceHandler.ResetDriverRaceVariable();
-
-       
         indexRace++;
         if(indexRace>= info.raceList.Count)
         {
@@ -179,9 +175,13 @@ public class CarrerHandler
             if(!info.dictionnaryTeam.TryGetValue(division, out List<Team>? teams) || teams == null || teams.Count <= 0)
                 continue;
             
-            RacingLogger.Info("--- " + division + " ---- ");
+            string divStr = "--- " + division + " ---";
+            int baseLenght = StringRacing.PadRightIndex + StringRacing.PadRightNameDriver + 3 * StringRacing.PadRightSeason; 
+            int divLenght = baseLenght + divStr.Length; 
+            divStr = divStr.PadLeft(divLenght/2).PadRight(divLenght/2);
+            RacingLogger.Info(divStr);
+
             info.driversList.Clear();
-            
             // Collecter tous les pilotes de cette division
             for(int indexTeam = 0; indexTeam < teams.Count; indexTeam++)
             {
@@ -194,33 +194,48 @@ public class CarrerHandler
             
             // Afficher le classement des pilotes
             info.driversList.Sort((x,y) => y.seasonStat.seasonPoint.CompareTo(x.seasonStat.seasonPoint));
-            RacingLogger.Info("Drivers Standings : ");
-            string headerDriverStr = "#".PadRight(StringRacing.PadRightIndex) 
-                + " Name".PadRight(StringRacing.PadRightNameDriver) + " | " 
-                + "Points".PadRight(StringRacing.PadRightSeason) + " | " 
-                + "Dnf".PadRight(StringRacing.PadRightSeason) + " | " 
-                + "AvgPlace".PadRight(StringRacing.PadRightSeason);
-            RacingLogger.Info(headerDriverStr);
-            
+
+            string driverStr = "Drivers Standings" ;
+            int driverStrLength = baseLenght + driverStr.Length;
+            driverStr = driverStr.PadLeft(driverStrLength/2).PadRight(driverStrLength/2);
+            RacingLogger.Info(driverStr);
+
+            string headerDriverStr =  "#".PadRight(StringRacing.PadRightIndex) + " | "  
+                                    + "Name".PadRight(StringRacing.PadRightNameDriver) + " | " 
+                                    + "Points".PadRight(StringRacing.PadRightSeason) + " | " 
+                                    + "Dnf".PadRight(StringRacing.PadRightSeason) + " | " 
+                                    + "AvgPlace".PadRight(StringRacing.PadRightSeason);
+            RacingLogger.Info(headerDriverStr);  
+
             for(int index = 0; index < info.driversList.Count; index++)
-                RacingLogger.Info("#" + (index+1).ToString().PadRight(StringRacing.PadRightIndex) 
-                + info.driversList[index].GetName().PadRight(StringRacing.PadRightNameDriver) 
-                + " " + info.driversList[index].ToStringSeason());
+            {
+                string driverInfoStr = ("#"+(index+1).ToString()).PadRight(StringRacing.PadRightIndex) + " | "  
+                                    + info.driversList[index].GetName().PadRight(StringRacing.PadRightNameDriver) + " | "  
+                                    + info.driversList[index].ToStringSeason() ;
+                RacingLogger.Info(driverInfoStr);
+            }
+                
 
             // Afficher le classement des équipes
             teams.Sort((x,y) => y.GetSeasonPoint().CompareTo(x.GetSeasonPoint()));
-            RacingLogger.Info("Teams Standings : ");
-            string headerTeamStr = "#".PadRight(StringRacing.PadRightIndex) 
-                            + " Name".PadRight(StringRacing.PadRightNameTeam) + " | " 
-                            + "Points".PadRight(StringRacing.PadRightPointTeam);
+
+            string teamStr = "Teams Standings" ;
+            int teamStrLength = baseLenght + teamStr.Length;
+            teamStr = teamStr.PadLeft(teamStrLength/2).PadRight(teamStrLength/2);
+            RacingLogger.Info(teamStr);
+
+            string headerTeamStr = "#".PadRight(StringRacing.PadRightIndex) + " | " 
+                                    + "Name".PadRight(StringRacing.PadRightNameTeam) + " | " 
+                                    + "Points".PadRight(StringRacing.PadRightPointTeam);
             RacingLogger.Info(headerTeamStr);
             
             for(int index = 0; index < teams.Count; index++)
             {
                 string teamName = teams[index].Name ?? "Unknown";
-                RacingLogger.Info("#" + (index+1).ToString().PadRight(StringRacing.PadRightIndex) + " " 
-                + teamName.PadRight(StringRacing.PadRightNameTeam) + "| " 
-                + teams[index].GetSeasonPoint().ToString().PadRight(StringRacing.PadRightPointTeam));
+                string teamInfoStr = ("#" + (index+1)).ToString().PadRight(StringRacing.PadRightIndex) + " | " 
+                                    + teamName.PadRight(StringRacing.PadRightNameTeam) + " | " 
+                                    + teams[index].GetSeasonPoint().ToString().PadRight(StringRacing.PadRightPointTeam);
+                RacingLogger.Info(teamInfoStr);
             }
         }
     }
