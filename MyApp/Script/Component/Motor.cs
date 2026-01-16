@@ -1,25 +1,55 @@
 using Microsoft.Data.Sqlite;
 
-public class Motor : Component
+public class Motor : Component,IRaceAble
 {
+    private enum EMotorStats
+    {
+        Power = 0,
+        Fiability,
+        MAX
+    };
     public static string READDB => "SELECT * FROM motors";
 
     public int Id{get;set;}
     public string? Name{get;set;}
-    public int Power{get;set;}
-    public int Fiability{get;set;}
-
+    private int[] statistics = new int[(int)EMotorStats.MAX];
+    private float[] turnCoeff = new float[(int)EMotorStats.MAX];
+    private float[] lineCoeff = new float[(int)EMotorStats.MAX];
     public void LoadData(SqliteDataReader reader)
     {
         Id = reader.GetInt32(0);
         Name = reader.GetString(1);
-        Power = reader.GetInt32(2);
-        Fiability = reader.GetInt32(3);
+        for(int i = 0; i < statistics.Length;i++)
+            statistics[i] = reader.GetInt32(i+2);
     }
-    public float GetGeneral() => (Power + Fiability)/2f;
+    public float GetGeneral()
+    {
+        int sum = 0;
+        for (int i = 0;i< (int)EMotorStats.MAX;i++)
+        {
+            sum += statistics[i];
+        }
+        return (float) sum / (float)EMotorStats.MAX;
+    }
     public override string ToString()
     {
-        return $"{Id}: {Name} - Power: {Power}, Fiability: {Fiability}";
+        string statStr = $"";
+        for (int i = 0;i< (int)EMotorStats.MAX;i++)
+        {
+            statStr += $"{(EMotorStats)i}: {statistics[i]},";
+        }
+        return $"{Id}: {Name} - " + statStr;
     }
 
-};
+    public float CalculateTurnPoint()
+    {
+        IRaceAble raceAble = this;
+        return raceAble.CalculatePoint(turnCoeff,statistics);
+    }
+
+    public float CalculateLinePoint()
+    {
+        IRaceAble raceAble = this;
+        return raceAble.CalculatePoint(turnCoeff,statistics);
+    }
+}

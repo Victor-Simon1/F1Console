@@ -18,7 +18,7 @@ public static class RacingLogger
     public static LogLevel MinimumLevel = LogLevel.Debug;
 
     // Global prefix for all logs
-    public static string GlobalPrefix = "[MUP]";
+    public static string GlobalPrefix = "[RACING]";
 
     // Enable/disable timestamp in logs
     public static bool IncludeTimestamp = false;

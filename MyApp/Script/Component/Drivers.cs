@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Data.Sqlite;
 
 
-public class  Driver : Component,IUpdatable
+public class  Driver : Component,IUpdatable,IRaceAble
 {
     private enum EDriverStats : int
     {
@@ -128,49 +128,32 @@ public class  Driver : Component,IUpdatable
         
         raceStat.Reset();
     }
-    private float CalculatePoint(float[] array,bool isMax = true)
+    
+    float CalculateTurnPoint()
     {
-        float maxPoint = 0f;
-        float divisor = 0f;
-        float stat = 99f;
-        for(int i = 0; i < array.Length; i++)
-        {
-            if(!isMax)
-                stat = driverStats[i] + raceStat.driverForm[i];
-            maxPoint += stat * array[i];
-            divisor += array[i];
-        }
-           
-        return maxPoint / divisor;
-    } 
-    private float CalculateMaxTurnPoint()
-    {
-        return CalculatePoint(driverTurnCoeff);
+        IRaceAble raceAble = this;
+        return raceAble.CalculatePoint(driverTurnCoeff,driverStats);
     }
-    private float CalculateMaxLinePoint()
+
+    float CalculateLinePoint()
     {
-        return  CalculatePoint(driverLineCoeff);
+        IRaceAble raceAble = this;
+        return raceAble.CalculatePoint(driverLineCoeff,driverStats);
     }
+
     public static float CalculMaxPoints(int nbTurn, float length)
     {
         Driver driver = new Driver();
-        float turnPoint = nbTurn * (driver.CalculateMaxTurnPoint()*turnDriverCoeff+ Team.GetMaxTurnPoint() * turnTeamCoeff) / (turnDriverCoeff+turnTeamCoeff);
-        float linePoint = length* (driver.CalculateMaxLinePoint()*lineDriverCoeff + Team.GetMaxLinePoint() * lineTeamCoeff) / (lineDriverCoeff+lineTeamCoeff); 
+        IRaceAble raceAble = driver;
+        float turnPoint = nbTurn * (raceAble.CalculateMaxTurnPoint()*turnDriverCoeff+ raceAble.CalculateMaxTurnPoint() * turnTeamCoeff) / (turnDriverCoeff+turnTeamCoeff);
+        float linePoint = length* (raceAble.CalculateMaxLinePoint()*lineDriverCoeff + raceAble.CalculateMaxTurnPoint() * lineTeamCoeff) / (lineDriverCoeff+lineTeamCoeff); 
         return (float)( turnPoint + linePoint ) / 2f;
     }
 
-    private float CalculateTurnPoint()
-    {
-        return CalculatePoint(driverTurnCoeff,false);
-    }
-    private float CalculateLinePoint()
-    {
-        return CalculatePoint(driverLineCoeff,false);
-    }
     public float CalculatePointPerTours(int nbTurn, float length,Team team)
     {
-        float turnPoint = nbTurn * ( CalculateTurnPoint() * turnDriverCoeff + team.GetTurnPoint() * turnTeamCoeff) / (turnDriverCoeff + turnTeamCoeff);  
-        float linePoint = length * (CalculateLinePoint() * lineDriverCoeff + team.GetLinePoint() * lineTeamCoeff ) / (lineDriverCoeff +lineTeamCoeff); 
+        float turnPoint = nbTurn * ( CalculateTurnPoint() * turnDriverCoeff + team.CalculateTurnPoint() * turnTeamCoeff) / (turnDriverCoeff + turnTeamCoeff);  
+        float linePoint = length * (CalculateLinePoint() * lineDriverCoeff + team.CalculateLinePoint() * lineTeamCoeff ) / (lineDriverCoeff +lineTeamCoeff); 
 
         float actualTurnPoint =  (float)(turnPoint + linePoint) / 2f;
         foreach(float penality in raceStat.penaltyPoint)
@@ -271,5 +254,15 @@ public class  Driver : Component,IUpdatable
                 "', s_overtake = '" + driverStats[(int)EDriverStats.OVERTAKE] +
                 "', s_defense = '" + driverStats[(int)EDriverStats.DEFENSE] +
                 "', s_tyrecontrol = '" + driverStats[(int)EDriverStats.TYRECONTROL] +"'" ;
+    }
+
+    float IRaceAble.CalculateTurnPoint()
+    {
+        return CalculateTurnPoint();
+    }
+
+    float IRaceAble.CalculateLinePoint()
+    {
+        return CalculateLinePoint();
     }
 };

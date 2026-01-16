@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.Data.Sqlite;
 
-public class Team : Component,IUpdatable/*,Saveable*/
+public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
 {
     public static string READDB => "SELECT * FROM teams";
 
@@ -20,7 +20,6 @@ public class Team : Component,IUpdatable/*,Saveable*/
     [JsonIgnore]
     public Driver? Driver2 {get;set;}
     public int IdDriver2{get;set;}
-
 
     public EDivisionType divison;
     //const variable
@@ -103,26 +102,51 @@ public class Team : Component,IUpdatable/*,Saveable*/
         return Driver1.seasonStat.seasonPoint + Driver2.seasonStat.seasonPoint;
     }
 
-    public static float GetMaxTurnPoint()
+    private float CalculatePoint(float[] arrayCoeef,float[] arrayStat,bool isMax = true)
     {
-        return (99f * chassisStabilityTurnCoeff + 99f * chassisAeroTurnCoeff) / (chassisStabilityTurnCoeff+chassisAeroTurnCoeff);
-    }
-    public static float GetMaxLinePoint()
+        float maxPoint = 0f;
+        float divisor = 0f;
+        float stat = 99f;
+        for(int i = 0; i < arrayCoeef.Length; i++)
+        {
+            if(!isMax)
+                stat = arrayStat[i];
+            maxPoint += stat * arrayCoeef[i];
+            divisor += arrayCoeef[i];
+        }
+           
+        return maxPoint / divisor;
+    } 
+
+    public float CalculateTurnPoint()
     {
-        return (99f*motorPowerCoeff + 99f*chassisAeroLineCoeff)/(motorPowerCoeff + chassisAeroLineCoeff);
+        if(Chassis == null)
+        {
+            RacingLogger.Error($"Chassis of team {Name} is null");
+            return 0f;
+        }
+        if(Motor == null)
+        {
+            RacingLogger.Error($"Motor of team {Name} is null");
+            return 0f;
+        }
+        return Chassis.CalculateTurnPoint() + Motor.CalculateTurnPoint();
     }
-    public float GetTurnPoint()
+    public float CalculateLinePoint()
     {
-        if(Chassis != null)
-            return (Chassis.Stability*chassisStabilityTurnCoeff + Chassis.Aero * chassisAeroTurnCoeff) / (chassisStabilityTurnCoeff +chassisAeroTurnCoeff); 
-        return 0f;
+        if(Chassis == null)
+        {
+            RacingLogger.Error($"Chassis of team {Name} is null");
+            return 0f;
+        }
+        if(Motor == null)
+        {
+            RacingLogger.Error($"Motor of team {Name} is null");
+            return 0f;
+        }
+        return Chassis.CalculateLinePoint() + Motor.CalculateLinePoint();
     }
-    public float GetLinePoint()
-    {
-        if(Motor != null && Chassis != null)
-            return (Motor.Power*motorPowerCoeff + Chassis.Aero * chassisAeroLineCoeff)/(motorPowerCoeff+chassisAeroLineCoeff);
-        return 0f;
-    }
+
     public override string ToString()
     {
         return Id + " : " + Name +"," + IdChassis + "," + IdMotor + ",Driver " + IdDriver1 + "/"+IdDriver2; 
@@ -135,4 +159,14 @@ public class Team : Component,IUpdatable/*,Saveable*/
                 ", idChassis = " + IdChassis +
                 ", idMotor = " + IdMotor;
     }
+
+    /*float IRaceAble.CalculateTurnPoint()
+    {
+        return CalculateTurnPoint();
+    }
+
+    float IRaceAble.CalculateLinePoint()
+    {
+        return CalculateLinePoint();
+    }*/
 }
