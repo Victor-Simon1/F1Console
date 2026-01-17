@@ -88,6 +88,7 @@ public class CarrerHandler
         string jsonSrc = directory+"/"+input+".json";
         File.Create(jsonSrc).Dispose();
         SaveSystem.SaveListToJson(this,jsonSrc);
+        
         if (info != null)
         {
             foreach(Team t in info.teamsList)

@@ -20,9 +20,7 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
     [JsonIgnore]
     public Driver? Driver2 {get;set;}
     public int IdDriver2{get;set;}
-
     public EDivisionType divison;
-
 
     public void LoadData(SqliteDataReader reader)
     {

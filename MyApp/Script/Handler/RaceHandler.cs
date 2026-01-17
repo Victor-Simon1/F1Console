@@ -51,6 +51,11 @@ public class RaceHandler
         GameManager.instance.database.CurrentDatabaseName = allfiles[input];
         GameManager.instance.database.info = info;
         GameManager.instance.database.LoadDatabase();
+        if (info != null)
+        {
+            foreach(Team t in info.teamsList)
+                t.SetFromId(ref info);
+        }
     }
 
     private void ChooseRace()
