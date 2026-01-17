@@ -6,6 +6,7 @@ public class Motor : Component,IRaceAble
     {
         Power = 0,
         Fiability,
+        Acceleration,
         MAX
     };
     public static string READDB => "SELECT * FROM motors";

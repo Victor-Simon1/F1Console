@@ -6,6 +6,7 @@ public class  Chassis : Component,IRaceAble
     {
         Aero = 0,
         Stability,
+        EngineCooling,
         MAX
     };
     public static string READDB => "SELECT * FROM chassis";
