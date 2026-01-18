@@ -191,12 +191,22 @@ public class  Driver : Component,IUpdatable,IRaceAble
     {
         int update = 0;
         int age = BirthdateToAge();
+
+        bool updatePositive = false;
+        bool updateNegative = false;
         if(age>34)
-            update = -1;
+            updateNegative = true;
         else if(age <25 && GetGeneral() < potential)
-            update = 1;
+            updatePositive = true;
         for(int i = 0;i<(int)EDriverStats.MAX;i++)
+        {
+            if(updatePositive)
+                update = RacingLibrary.GetRandomIntInclusive(0,2);
+            else if(updateNegative)
+                update = RacingLibrary.GetRandomIntInclusive(-2,0);
             driverStats[i] += update;
+        }
+           
         if(update != 0)
             RacingLogger.Info("Le pilote " + LastName + " a changé de notes");
     }

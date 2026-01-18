@@ -176,11 +176,7 @@ public class CarrerHandler
             if(!info.dictionnaryTeam.TryGetValue(division, out List<Team>? teams) || teams == null || teams.Count <= 0)
                 continue;
             
-            string divStr = "--- " + division + " ---";
-            int baseLenght = StringRacing.PadRightIndex + StringRacing.PadRightNameDriver + 3 * StringRacing.PadRightSeason; 
-            int divLenght = baseLenght + divStr.Length; 
-            divStr = divStr.PadLeft(divLenght/2).PadRight(divLenght/2);
-            RacingLogger.Info(divStr);
+            RacingLogger.Info(StringRacing.CenterString($"--- " + division + " ---"));
 
             info.driversList.Clear();
             // Collecter tous les pilotes de cette division
@@ -196,10 +192,7 @@ public class CarrerHandler
             // Afficher le classement des pilotes
             info.driversList.Sort((x,y) => y.seasonStat.seasonPoint.CompareTo(x.seasonStat.seasonPoint));
 
-            string driverStr = "Drivers Standings" ;
-            int driverStrLength = baseLenght + driverStr.Length;
-            driverStr = driverStr.PadLeft(driverStrLength/2).PadRight(driverStrLength/2);
-            RacingLogger.Info(driverStr);
+            RacingLogger.Info(StringRacing.CenterString($"Drivers Standings"));
 
             string headerDriverStr =  "#".PadRight(StringRacing.PadRightIndex) + " | "  
                                     + "Name".PadRight(StringRacing.PadRightNameDriver) + " | " 
@@ -220,10 +213,7 @@ public class CarrerHandler
             // Afficher le classement des équipes
             teams.Sort((x,y) => y.GetSeasonPoint().CompareTo(x.GetSeasonPoint()));
 
-            string teamStr = "Teams Standings" ;
-            int teamStrLength = baseLenght + teamStr.Length;
-            teamStr = teamStr.PadLeft(teamStrLength/2).PadRight(teamStrLength/2);
-            RacingLogger.Info(teamStr);
+            RacingLogger.Info(StringRacing.CenterString($"Teams Standings"));
 
             string headerTeamStr = "#".PadRight(StringRacing.PadRightIndex) + " | " 
                                     + "Name".PadRight(StringRacing.PadRightNameTeam) + " | " 

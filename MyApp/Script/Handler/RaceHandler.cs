@@ -84,12 +84,17 @@ public class RaceHandler
         EventExtensions.InitEvent();
         Race currentRace = info.raceList[indexRace];
         //foreach(EDivisionType eDivisionType in currentRace.divisionRacing)
-        RacingLogger.Info("Division " +division);
+         RacingLogger.Info(StringRacing.CenterString($"----------------"));
         if(!currentRace.divisionRacing.Contains(division) || info.dictionnaryTeam[division].Count <=0)
         {
             RacingLogger.Info("Pas de course de cette division "+ division + " cette semaine !");
             return;
         }
+        else
+        {
+            RacingLogger.Info(StringRacing.CenterString($"Division {division}"));
+        }
+            
             
         RacingLogger.Info(currentRace.ToString());
 

@@ -14,7 +14,7 @@ public class SaveSystem
         public int year;
         [JsonInclude]
         public int pointSystemUse;
-        public string ToString()
+        public new string ToString()
         {
             string str = "";
             str += actualRace+"\n";

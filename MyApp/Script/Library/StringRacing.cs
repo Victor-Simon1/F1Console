@@ -5,4 +5,14 @@ public static class StringRacing
     public const int PadRightNameTeam = 50;
     public const int PadRightPointTeam = 10;
     public const int PadRightNameDriver = 30;
+
+
+    public static string CenterString(string strBase)
+    {
+        int baseLenght = PadRightIndex + PadRightNameDriver + 3 * PadRightSeason; 
+        string newString = strBase ;
+        int StrLength = baseLenght + newString.Length;
+        newString = newString.PadLeft(StrLength/2).PadRight(StrLength/2);
+        return newString;
+    }
 }
