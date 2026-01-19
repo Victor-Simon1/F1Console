@@ -1,10 +1,18 @@
 
 -- SQLite
-/*CREATE TABLE drivers(
+/*CREATE TABLE drivers2 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    firstname VARCHAR(40),
-    lastname VARCHAR(40),
-    birthdate DATE
+    firstname VARCHAR(40) NOT NULL,
+    lastname VARCHAR(40) NOT NULL,
+    birthdate DATE DEFAULT '01/01/2000',
+    potential INTEGER DEFAULT 65,
+	s_turn REAL NOT NULL DEFAULT 50,
+	s_break REAL NOT NULL DEFAULT 50,
+	s_overtake REAL NOT NULL DEFAULT 50,
+	s_defense REAL NOT NULL DEFAULT 50,
+	s_tyrecontrol REAL NOT NULL DEFAULT 50,
+	s_regularity REAL NOT NULL DEFAULT 50,
+	s_reactivity REAL NOT NULL DEFAULT 50
 );
 
 CREATE TABLE teams(

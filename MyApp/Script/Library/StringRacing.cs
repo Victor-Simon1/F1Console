@@ -5,6 +5,10 @@ public static class StringRacing
     public const int PadRightNameTeam = 50;
     public const int PadRightPointTeam = 10;
     public const int PadRightNameDriver = 30;
+//Notes
+    public const int PadRightGeneralAndPotential = 5;
+
+    public const string Separator = " | ";
 
 
     public static string CenterString(string strBase)

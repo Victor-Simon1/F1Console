@@ -34,8 +34,8 @@ public class  Driver : Component,IUpdatable,IRaceAble
             if(nbRaceMake != 0)
                 avgPlace = sumPlace / nbRaceMake;
             string seasonPointStr = (seasonPoint + " ").PadRight(StringRacing.PadRightSeason);
-            string nbDnfStr =       (" | " + nbDnf + " ").PadRight(StringRacing.PadRightSeason);
-            string avgPlaceStr =    (" | "+ avgPlace + " ").PadRight(StringRacing.PadRightSeason);
+            string nbDnfStr =       (StringRacing.Separator + nbDnf + " ").PadRight(StringRacing.PadRightSeason);
+            string avgPlaceStr =    (StringRacing.Separator+ avgPlace + " ").PadRight(StringRacing.PadRightSeason);
             return seasonPointStr + nbDnfStr + avgPlaceStr; 
         }
     }
@@ -96,19 +96,11 @@ public class  Driver : Component,IUpdatable,IRaceAble
         FirstName = reader.GetString(1);
         LastName = reader.GetString(2);
         Birthdate = reader.GetString(3);
-
         //Stats
+        potential = reader.GetInt32(4);
 
-        driverStats[(int)EDriverStats.TURN] = reader.GetInt32(4);
-        driverStats[(int)EDriverStats.BREAK] = reader.GetInt32(5);
-        driverStats[(int)EDriverStats.OVERTAKE] = reader.GetInt32(6);
-        driverStats[(int)EDriverStats.DEFENSE] = reader.GetInt32(7);
-        driverStats[(int)EDriverStats.TYRECONTROL] = reader.GetInt32(8);
-
-        potential = reader.GetInt32(9);
-
-        driverStats[(int)EDriverStats.REGULARITY] = reader.GetInt32(10);
-        driverStats[(int)EDriverStats.REACTIVITY] = reader.GetInt32(11);
+        for(int indexStat = 0;indexStat<(int)EDriverStats.MAX;indexStat++)
+            driverStats[indexStat] = reader.GetInt32(indexStat+4);
     }
 
     #endregion
@@ -254,7 +246,7 @@ public class  Driver : Component,IUpdatable,IRaceAble
         {
             general += driverStats[i];
         }
-        return general / (float)EDriverStats.MAX; 
+        return (float)Math.Round(general / (float)EDriverStats.MAX,2); 
     }
 
     public string UpdateRowString()
