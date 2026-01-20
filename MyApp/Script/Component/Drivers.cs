@@ -22,9 +22,9 @@ public class  Driver : Component,IUpdatable,IRaceAble
     };
     public struct SeasonStat
     {
-        public int seasonPoint =0;
-        public int nbDnf =0;
-
+        public int seasonPoint = 0;
+        public int nb_victory = 0;
+        public int nbDnf = 0;
         public float sumPlace = 0f;
         public int nbRaceMake = 0;
         public SeasonStat(){}
@@ -37,6 +37,22 @@ public class  Driver : Component,IUpdatable,IRaceAble
             string nbDnfStr =       (StringRacing.Separator + nbDnf + " ").PadRight(StringRacing.PadRightSeason);
             string avgPlaceStr =    (StringRacing.Separator+ avgPlace + " ").PadRight(StringRacing.PadRightSeason);
             return seasonPointStr + nbDnfStr + avgPlaceStr; 
+        }
+        public void Load(int _seasonPoint,int _nb_victory,int _nbDnf,int _sumPlace)
+        {
+            nb_victory = _nb_victory;
+            seasonPoint = _seasonPoint;
+            sumPlace = _sumPlace;
+            nbDnf = _nbDnf;
+        }
+       
+        public void Reset()
+        {
+            nbDnf = 0;
+            sumPlace = 0;
+            nbRaceMake = 0;
+            nb_victory = 0;
+            seasonPoint = 0;
         }
     }
     public struct RaceStat
@@ -59,7 +75,24 @@ public class  Driver : Component,IUpdatable,IRaceAble
             }
         }
     }
-    
+
+    public struct CarrerStat
+    {
+        public int points = 0;
+        public int nb_victory = 0;
+        public int nbDnf = 0;
+
+        public CarrerStat()
+        {
+        }
+
+        public void Load(int _points,int _nb_victory,int _nbDnf)
+        {
+            points = _points;
+            nb_victory = _nb_victory;
+            nbDnf = _nbDnf;
+        }
+    }
     public static string READDB => "SELECT * FROM drivers";
     public int Id { get ; set; }
     public string? FirstName{get;set;}
@@ -77,6 +110,7 @@ public class  Driver : Component,IUpdatable,IRaceAble
     public RaceStat raceStat = new RaceStat();
     //Carreer Variable
     public SeasonStat seasonStat = new SeasonStat();
+    public CarrerStat carrerStat = new CarrerStat();
     //const variable
     const float turnDriverCoeff = 0.7f;
     const float turnTeamCoeff = 0.5f;
@@ -179,6 +213,11 @@ public class  Driver : Component,IUpdatable,IRaceAble
     #endregion
 
     #region CAREER_FUNCTION
+    public void UpdateCarrerStats()
+    {
+        carrerStat.nb_victory += seasonStat.nb_victory;
+        carrerStat.points += seasonStat.seasonPoint; 
+    }
     public void UpdateStats()
     {
         int update = 0;
@@ -255,7 +294,10 @@ public class  Driver : Component,IUpdatable,IRaceAble
                 "', s_break = '" + driverStats[(int)EDriverStats.BREAK] +
                 "', s_overtake = '" + driverStats[(int)EDriverStats.OVERTAKE] +
                 "', s_defense = '" + driverStats[(int)EDriverStats.DEFENSE] +
-                "', s_tyrecontrol = '" + driverStats[(int)EDriverStats.TYRECONTROL] +"'" ;
+                "', s_tyrecontrol = '" + driverStats[(int)EDriverStats.TYRECONTROL] +
+                "', s_regularity = '" + driverStats[(int)EDriverStats.REGULARITY] +
+                "', s_reactivity = '" + driverStats[(int)EDriverStats.REACTIVITY] +  
+                "'" ;
     }
 
     float IRaceAble.CalculateTurnPoint()

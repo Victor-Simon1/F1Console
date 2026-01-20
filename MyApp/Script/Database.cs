@@ -53,6 +53,8 @@ public class Database
                 LoadData<Team>(info.teamsList, connection);
                 LoadData<Race>(info.raceList, connection);
                 
+                LoadSeasonResult(info.driversList,connection);
+                LoadCareerResult(info.driversList,connection);
                 // Initialiser le dictionnaire des équipes par division
                 if (!info.dictionnaryTeam.ContainsKey(EDivisionType.Formula1))
                     info.dictionnaryTeam.Add(EDivisionType.Formula1, new List<Team>());
@@ -235,8 +237,153 @@ public class Database
         }
     }
     #endregion
-
+    #region DRIVER_RESULT
+    //call when saving
+    public void UpdateSeasonResult(Driver d)
+    {
+        try
+        {
+            using (var connection = GetConnection())
+            {
+                const string table = "drivers_current_season"; 
+                int id = d.Id;
+                int new_nb_victory = d.seasonStat.nb_victory;
+                int new_points = d.seasonStat.seasonPoint;
+                connection.Open();
+                // Utilisation de paramètres SQL pour éviter les injections SQL
+                using (SqliteCommand command = new SqliteCommand($"UPDATE [{table}] SET nb_victory = @new_nb_victory, points = @new_points WHERE ID = @id", connection))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("@new_nb_victory", new_nb_victory);
+                    command.Parameters.AddWithValue("@new_points", new_points);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (SystemException ex)
+        {
+            RacingLogger.Exception(ex, "UpdateAllTimeResult");
+        }
+    }
+    private void LoadSeasonResult(List<Driver> list, SqliteConnection connection)
+    {
+        const string cmdStr = "SELECT * FROM drivers_current_season"; 
+        using (var cmd = new SqliteCommand(cmdStr, connection))
+        {
+            using (SqliteDataReader reader = cmd.ExecuteReader())
+            {
+                int driver_index = 0;
+                while(reader.Read()) 
+                {
+                    RacingLogger.Debug(list[driver_index].GetName() +"d'id " + list[driver_index].Id +":"+ reader.GetInt32(0).ToString() + " a eu sa saison remplie");
+                    list[driver_index].seasonStat.Load(reader.GetInt32(1),reader.GetInt32(2),reader.GetInt32(3),reader.GetInt32(4));
+                    driver_index++;
+                }
+            }
+        }
+    }
+    //Call only when saving
+    public void UpdateAllTimeResult(Driver d)
+    {
+        try
+        {
+            using (var connection = GetConnection())
+            {
+                const string table = "drivers_alltime_stats"; 
+                int id = d.Id;
+                int new_nb_victory = d.carrerStat.nb_victory + d.seasonStat.nb_victory;
+                int new_points = d.carrerStat.points + d.seasonStat.seasonPoint;
+                connection.Open();
+                // Utilisation de paramètres SQL pour éviter les injections SQL
+                using (SqliteCommand command = new SqliteCommand($"UPDATE [{table}] SET nb_victory = @new_nb_victory, points = @new_points WHERE ID = @id", connection))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("@new_nb_victory", new_nb_victory);
+                    command.Parameters.AddWithValue("@new_points", new_points);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (SystemException ex)
+        {
+            RacingLogger.Exception(ex, "UpdateAllTimeResult");
+        }
+    }
+    private void LoadCareerResult(List<Driver> list, SqliteConnection connection)
+    {
+        const string cmdStr = "SELECT * FROM drivers_current_season"; 
+        using (var cmd = new SqliteCommand(cmdStr, connection))
+        {
+            using (SqliteDataReader reader = cmd.ExecuteReader())
+            {
+                int driver_index = 0;
+                while(reader.Read()) 
+                {
+                    RacingLogger.Debug(list[driver_index].GetName() +"d'id " + list[driver_index].Id +":"+ reader.GetInt32(0).ToString() + " a eu sa carriere remplie");
+                    list[driver_index].carrerStat.Load(reader.GetInt32(1),reader.GetInt32(2),reader.GetInt32(3));
+                    driver_index++;
+                }
+            }
+        }
+    }
+    #endregion
     #region SAVE_DB
+
+    public void UpdateRowCurrentSeasonDriverStat(Driver obj)
+    {
+        try
+        {
+            using (var connection = GetConnection())
+            {
+                connection.Open();
+                // Utilisation de paramètres SQL pour éviter les injections SQL
+                const string table = "drivers_current_season";
+                string setStr = $" nb_victory = @nb_victory , points = @seasonPoint , sumPlace = @sumPlace , nbDnf = @nbDnf ";
+                string commandStr = $"UPDATE [{table}] SET {setStr} WHERE ID = @id";
+                
+                using (SqliteCommand command = new SqliteCommand(commandStr, connection))
+                {
+                    command.Parameters.AddWithValue("@id", obj.Id);
+                    command.Parameters.AddWithValue("@nb_victory", obj.seasonStat.nb_victory);
+                    command.Parameters.AddWithValue("@seasonPoint", obj.seasonStat.seasonPoint);
+                    command.Parameters.AddWithValue("@sumPlace", obj.seasonStat.sumPlace);
+                    command.Parameters.AddWithValue("@nbDnf", obj.seasonStat.nbDnf);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (SystemException ex)
+        {
+            RacingLogger.Exception(ex, "UpdateRow");
+        }
+    }
+    public void UpdateRowAllTimeSeasonDriverStat(Driver obj)
+    {
+        try
+        {
+            using (var connection = GetConnection())
+            {
+                connection.Open();
+                // Utilisation de paramètres SQL pour éviter les injections SQL
+                const string table = "drivers_alltime_stats";
+                string setStr = $" nb_victory = @nb_victory , points = @points , nb_dnf = @nbDnf ";
+                string commandStr = $"UPDATE [{table}] SET {setStr} WHERE ID = @id";
+                
+                using (SqliteCommand command = new SqliteCommand(commandStr, connection))
+                {
+                    command.Parameters.AddWithValue("@id", obj.Id);
+                    command.Parameters.AddWithValue("@nb_victory", obj.carrerStat.nb_victory);
+                    command.Parameters.AddWithValue("@points", obj.carrerStat.points);
+                    command.Parameters.AddWithValue("@nbDnf", obj.carrerStat.nbDnf);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (SystemException ex)
+        {
+            RacingLogger.Exception(ex, "UpdateRow");
+        }
+    }
 
     public void UpdateRow<T>(T obj, string table) where T : IUpdatable, Component
     {

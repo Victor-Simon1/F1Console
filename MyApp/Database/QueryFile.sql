@@ -28,6 +28,13 @@ CREATE TABLE teams(
     FOREIGN KEY (idMotor) REFERENCES motors(id) 
     );
 
+CREATE TABLE drivers_current_season(
+	id INTEGER NOT NULL,
+	points INTEGER NOT NULL DEFAULT 0,
+	nb_victory INTEGER NOT NULL DEFAULT 0,
+	FOREIGN KEY (id) REFERENCES drivers(id)
+);
+	
 
 CREATE TABLE motors(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -160,3 +167,15 @@ ADD COLUMN facademy_racing BOOLEAN NOT NULL DEFAULT FALSE;*/
 UPDATE drivers 
 SET s_turn = '51', s_break = '50', s_overtake = '50', s_defense = '50', s_tyrecontrol = '50' 
 WHERE ID = '49';
+CREATE TRIGGER temp_add_driver_to_alltimestat AFTER UPDATE 
+ON drivers
+BEGIN
+	INSERT INTO drivers_alltime_stats(id,points,nb_victory) 
+	VALUES(new.ID,0,0);
+END;
+CREATE TRIGGER add_driver_to_stat_alltime AFTER INSERT 
+ON drivers
+BEGIN
+	INSERT INTO drivers_alltime_stats(id,points,nb_victory,nbDnf) 
+	VALUES(new.ID,0,0,0);
+END;

@@ -328,13 +328,16 @@ public class CarrerHandler
                 var team = teams[indexTeam];
                 if (team.Driver1 != null)
                 {
-                    team.Driver1.seasonStat.seasonPoint = 0;
-                    team.Driver1.UpdateStats();
+                    team.Driver1.UpdateCarrerStats();
+                    team.Driver1.seasonStat.Reset();
+                    team.Driver1.UpdateStats(); 
                 }
                 if (team.Driver2 != null)
                 {
-                    team.Driver2.seasonStat.seasonPoint = 0;
+                    team.Driver1.UpdateCarrerStats();
+                    team.Driver2.seasonStat.Reset();
                     team.Driver2.UpdateStats();
+                    
                 }
             }
         }
@@ -372,12 +375,24 @@ public class CarrerHandler
         {
             if (team == null)
                 continue;
-
+            RacingLogger.Debug($"Update row of team {team.Name}");
             GameManager.instance.database.UpdateRow<Team>(team, "teams");
             if (team.Driver1 != null)
-                GameManager.instance.database.UpdateRow<Driver>(team.Driver1, "drivers");
+            {
+                GameManager.instance.database.UpdateRow<Driver>(team.Driver1, "drivers"); 
+                GameManager.instance.database.UpdateAllTimeResult(team.Driver1);
+                GameManager.instance.database.UpdateRowAllTimeSeasonDriverStat(team.Driver1);
+                GameManager.instance.database.UpdateRowCurrentSeasonDriverStat(team.Driver1);
+            }
+                
             if (team.Driver2 != null)
+            {
                 GameManager.instance.database.UpdateRow<Driver>(team.Driver2, "drivers");
+                GameManager.instance.database.UpdateAllTimeResult(team.Driver2);
+                GameManager.instance.database.UpdateRowAllTimeSeasonDriverStat(team.Driver2);
+                GameManager.instance.database.UpdateRowCurrentSeasonDriverStat(team.Driver2);
+            }
+                
         }
         RacingLogger.Info("Career saved successfully");
     }
