@@ -11,6 +11,7 @@ public class CarrerHandler
     {
         NEW = 0,
         LOAD,
+        DELETE,
         RETURN
     };
     private enum EGMCarrerLoopActions
@@ -25,12 +26,13 @@ public class CarrerHandler
         
     public void Start()
     {
-        SelectMode();
-        CarreerLoop();
+        bool needLoop = SelectMode();
+        if(needLoop)
+            CarreerLoop();
     }
 
     #region CAREER_ACTIONS
-    public void SelectMode()
+    public bool SelectMode()
     {
         foreach(int action in Enum.GetValues(typeof(EGMCarrerActions)))
             RacingLogger.Info(action + " : " + ((EGMCarrerActions)action).ToString());
@@ -43,13 +45,17 @@ public class CarrerHandler
             case (int)EGMCarrerActions.LOAD:
                 LoadCareer();
                 break;
+            case (int)EGMCarrerActions.DELETE:
+                DeleteCareer();
+                break;
             case (int)EGMCarrerActions.RETURN:
-                RacingLogger.Warning("TODO ");
+                //RacingLogger.Warning("TODO ");
                 break;
             default:
                 RacingLogger.Error("Entry not recognize ! Please enter a number in a relation with the different options ! ");
                 break;
         }
+        return inputConvert<(int)EGMCarrerActions.DELETE;
     }
 
     private void NewCareer()
@@ -102,7 +108,21 @@ public class CarrerHandler
         pointSystem.actualPointSystem = (PointSystem.EPointSystem)pSystemInput;
     }
 
-  
+    private void DeleteCareer()
+    {
+        RacingLogger.Info("What career do you want to delete?");
+        string[] allfiles = Directory.GetDirectories("Saves" , "*.*", SearchOption.TopDirectoryOnly);
+        for(int i= 0; i < allfiles.Length ; i++)
+            RacingLogger.Info(i+ " : " + allfiles[i]);
+        
+        //int nbRace = info.raceList.Count;
+        
+        int input = RacingLibrary.GetValidatedIntInput(0, allfiles.Length - 1, "Invalid career selection. Please enter a number between 0 and " + (allfiles.Length - 1));
+        carreerPath = allfiles[input];
+
+        Directory.Delete(carreerPath,true);
+        RacingLogger.Info(carreerPath + " deleted !");
+    }
 #endregion
 
 #region CAREER_GESTION

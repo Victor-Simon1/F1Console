@@ -8,6 +8,10 @@ public static class StringRacing
 //Notes
     public const int PadRightGeneralAndPotential = 5;
 
+//Database
+    public const int PadRightDbString = 40;
+    public const int PadRightDbInt = 10;
+
     public const string Separator = " | ";
 
 

@@ -517,23 +517,37 @@ public class Database
                             return;
                         }
                         int character = 0;
+                        string headerStr = "";
                         // Print column headers
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
-                            string columnHeader = reader.GetName(i).PadRight(20);
+                            string columnHeader = reader.GetName(i);
+                            Type type =  reader.GetFieldType(i);
+                            if(type == typeof(System.Int64))
+                                columnHeader = columnHeader.PadRight(StringRacing.PadRightDbInt);
+                            else
+                                columnHeader = columnHeader.PadRight(StringRacing.PadRightDbString);
                             character += columnHeader.Length;
-                            RacingLogger.Info(columnHeader);
+                            headerStr += columnHeader + " "; 
                         }
-                        RacingLogger.Info("\n" + new string('-', character));
+                        RacingLogger.Info(headerStr);
+                        RacingLogger.Info(new string('-', character));
                         // Print all rows
                         while (reader.Read())
                         {
+                            string rowStr = "";
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
                                 string? value = reader[i]?.ToString();
-                                RacingLogger.Info((value ?? string.Empty).PadRight(20));
+                                Type type =  reader.GetFieldType(i);
+                                if(type == typeof(System.Int64))
+                                    value = value.PadRight(StringRacing.PadRightDbInt);
+                                else
+                                    value = value.PadRight(StringRacing.PadRightDbString);
+                                rowStr += value + " ";
+                                //RacingLogger.Info((value ?? string.Empty).PadRight(20));
                             }
-                            RacingLogger.Info("");
+                            RacingLogger.Info(rowStr);
                         }
                     }
                 }
