@@ -1,8 +1,10 @@
 public static class RacingLibrary
 {
+    public static int ERROR_RETURN = -99;
     static Random rand = new Random();
     public static string BASEFILE = System.IO.Directory.GetCurrentDirectory();
     public static string SAVEFILE = BASEFILE + "\\Saves";
+    public static string DBFILE = BASEFILE + "\\Database";
     /// <summary>
     /// Génère un nombre aléatoire flottant dans la plage [minValue, maxValue] (inclusif)
     /// </summary>
@@ -93,8 +95,8 @@ public static class RacingLibrary
         }
         catch(Exception e)
         {
-            RacingLogger.Exception(e, "ConvertStringToInt");
-            return -1;
+            //RacingLogger.Exception(e, "ConvertStringToInt");
+            return ERROR_RETURN;
         }
     }
 

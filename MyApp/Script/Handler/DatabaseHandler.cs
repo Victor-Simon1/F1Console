@@ -9,6 +9,7 @@ public class DatabaseHandler
     {
         ADD = 0,
         DELETE,
+        RETURN,
         MAX
     };
 
@@ -36,9 +37,9 @@ public class DatabaseHandler
         RacingLogger.Info("Selected database: " + allfiles[input]);
         parent.database.CurrentDatabaseName = allfiles[input];
         parent.database.LoadDatabase();
-        EDBMode mode = SelectModification();
+   
         parent.database.GetTables();
-        RacingLogger.Info("Mode: " + mode);
+       
 
         input = SelectTable();
         if (input < 0 || input >= parent.database.tablesNameList.Count)
@@ -49,19 +50,28 @@ public class DatabaseHandler
 
         RacingLogger.Info("Selected table: " + parent.database.tablesNameList[input]);
         parent.database.CurrentTableName = parent.database.tablesNameList[input];
-
-        switch(mode)
+        EDBMode mode;
+        do
         {
+            mode = SelectModification();
+            RacingLogger.Info("Mode: " + mode);
+            switch(mode)
+            {
             case EDBMode.ADD:
                 HandleAddMode();
                 break;
             case EDBMode.DELETE:
                 HandleDeleteMode();
                 break;
+            case EDBMode.RETURN:
+                RacingLogger.Info("Return to the menu");
+                break;
             default:
                 RacingLogger.Error("Entry not recognized");
                 break;
-        }
+            }
+        }while(mode != EDBMode.RETURN);
+   
     }
 
     private void HandleAddMode()
@@ -77,33 +87,47 @@ public class DatabaseHandler
         }
 
         // Construire la liste des noms de colonnes (sauf ID)
-        var columnNames = string.Join(", ", parent.database.columnsNameList.Skip(1));
-        RacingLogger.Info("Columns: " + columnNames);
-        RacingLogger.Info("Enter values separated by commas (or -1 to quit):");
+        string[] columnNames =parent.database.columnsNameList.Skip(1).ToArray();
+        var columnNamesStr = string.Join(", ", parent.database.columnsNameList.Skip(1));
+        //RacingLogger.Info("Columns: " + columnNames);
+        //RacingLogger.Info("Enter values separated by commas (or -1 to quit):");
 
         bool isAdding = true;
+        string[] values = new string[columnNames.Length];
         while(isAdding)
         {
-            string? input = Console.ReadLine();
-            if (string.IsNullOrEmpty(input))
-                continue;
-
-            int inputInt = RacingLibrary.ConvertStringToInt(input);
-            if(inputInt == -1)
+            
+            RacingLogger.Debug("While +" +isAdding);
+            int inputInt; //= RacingLibrary.ConvertStringToInt(input);
+            for(int i = 0 ; i<columnNames.Length;i++)
             {
-                isAdding = false;
-                continue;
+                RacingLogger.Info("Rentrez la valeur pour : " + columnNames[i]);
+                string? input = Console.ReadLine();
+                if (string.IsNullOrEmpty(input))
+                    continue;
+                inputInt = RacingLibrary.ConvertStringToInt(input);
+                
+                if(inputInt == -1)
+                {
+                    RacingLogger.Info("Vous sortez de la saisie");
+                    isAdding = false;
+                    return;
+                }
+
+                values[i] = input;
             }
+                
+           RacingLogger.Debug("While +" +isAdding);
 
             // Parser les valeurs séparées par des virgules
-            string[] values = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            //string[] values = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (values.Length != parent.database.columnsNameList.Count - 1)
             {
                 RacingLogger.Error($"Expected {parent.database.columnsNameList.Count - 1} values, got {values.Length}");
                 continue;
             }
-
-            parent.database.InsertRowInTable(parent.database.CurrentTableName, columnNames, values);
+            RacingLogger.Debug(values.Length.ToString());
+            parent.database.InsertRowInTable(parent.database.CurrentTableName, columnNamesStr, values);
         }
     }
 
@@ -113,20 +137,29 @@ public class DatabaseHandler
             return;
 
         parent.database.ShowTable(parent.database.CurrentTableName);
-        RacingLogger.Info("Enter an ID to delete, -1 to quit");
-        
-        int input = RacingLibrary.GetIntInput();
-        while(input != -1)
+
+        int input;
+        do
         {
-            parent.database.DeleteRow(parent.database.CurrentTableName, input);
             RacingLogger.Info("Enter an ID to delete, -1 to quit");
             input = RacingLibrary.GetIntInput();
-        }
+           
+            if(input != -1)
+            {
+                bool rowHasBeenDeleted = parent.database.DeleteRow(parent.database.CurrentTableName, input);
+                if(rowHasBeenDeleted)
+                    RacingLogger.Info($"Row of id={input} has been deleted");
+                else
+                    RacingLogger.Warning($"Row of id={input} does not exist");
+            }
+           
+        }while(input != -1);
+        RacingLogger.Info($"You have return to the menu");
     }
     private int SelectActions()
     {
-        RacingLogger.Info("Choose an action!");
-        RacingLogger.Info("1 : Modify a database");
+        //RacingLogger.Info("Choose an action!");
+        //RacingLogger.Info("1 : Modify a database");
         GetDatabases();
         
         if (allfiles == null || allfiles.Length == 0)
@@ -142,8 +175,9 @@ public class DatabaseHandler
     private EDBMode SelectModification()
     {
         RacingLogger.Info("Choose a mode");
-        RacingLogger.Info("0 : ADD ");
-        RacingLogger.Info("1 : DELETE");
+        for(int i = 0; i<(int)EDBMode.MAX;i++)
+            RacingLogger.Info(i + " : " + (EDBMode)i);
+
 
         int input = RacingLibrary.GetValidatedIntInput(0, (int)EDBMode.MAX - 1, "Invalid mode selection. Please enter 0 for ADD or 1 for DELETE");
         return (EDBMode)input;
@@ -187,6 +221,22 @@ public class DatabaseHandler
     }
     private void CreateDatabase()
     {
+        RacingLogger.Info("Enter the name of the new database!");
+        
+        string dbName = Console.ReadLine();
+        //dbName +=".sqlite";
+
+        string destinationDB = RacingLibrary.DBFILE + "\\" + dbName+".sqlite";
+        //string destinationDB = directory + "/db.sqlite";
+        string sourceFile = RacingLibrary.DBFILE + "\\" + "db.sqlite";
+
+        /*allfiles = Directory.GetFiles("Database", "db.sqlite", SearchOption.AllDirectories);*/
+        if(!File.Exists(sourceFile))
+        {
+            RacingLogger.Warning("The default database is not here! Please verify if you have not suppress it !");
+            return;
+        }
+        File.Copy(sourceFile,destinationDB);
         
     }
     private void GetDatabases()

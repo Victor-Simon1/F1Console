@@ -210,14 +210,14 @@ public class Database
     }
     #endregion
     #region DELETE_PART
-    public void DeleteRow(string table, int id)
+    public bool DeleteRow(string table, int id)
     {
         if (string.IsNullOrEmpty(table))
         {
             RacingLogger.Error("DeleteRow: Table name is empty");
-            return;
+            return false;
         }
-
+        int nb_row_deleted = 0;
         try
         {
             using (var connection = GetConnection())
@@ -227,7 +227,7 @@ public class Database
                 using (SqliteCommand command = new SqliteCommand($"DELETE FROM [{table}] WHERE ID = @id", connection))
                 {
                     command.Parameters.AddWithValue("@id", id);
-                    command.ExecuteNonQuery();
+                    nb_row_deleted = command.ExecuteNonQuery();
                 }
             }
         }
@@ -235,6 +235,7 @@ public class Database
         {
             RacingLogger.Exception(ex, "DeleteRow");
         }
+        return nb_row_deleted > 0;
     }
     #endregion
     #region DRIVER_RESULT
@@ -523,7 +524,7 @@ public class Database
                         {
                             string columnHeader = reader.GetName(i);
                             Type type =  reader.GetFieldType(i);
-                            if(type == typeof(System.Int64))
+                            if(MathRacing.IsNumber(type))
                                 columnHeader = columnHeader.PadRight(StringRacing.PadRightDbInt);
                             else
                                 columnHeader = columnHeader.PadRight(StringRacing.PadRightDbString);
@@ -540,7 +541,7 @@ public class Database
                             {
                                 string? value = reader[i]?.ToString();
                                 Type type =  reader.GetFieldType(i);
-                                if(type == typeof(System.Int64))
+                                if(MathRacing.IsNumber(type))
                                     value = value.PadRight(StringRacing.PadRightDbInt);
                                 else
                                     value = value.PadRight(StringRacing.PadRightDbString);

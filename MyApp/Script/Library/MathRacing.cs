@@ -31,4 +31,7 @@ public class MathRacing
 
         return -3; // sécurité
     }
+
+    public static bool IsNumber(Type type) => type == typeof(Int64) || type == typeof(float) || type == typeof(double) ; 
+
 }
