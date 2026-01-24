@@ -102,29 +102,30 @@ public class RaceHandler
         RacingLogger.Info("Max point " + maxPoint);
         foreach(Team team in info.dictionnaryTeam[division] )
         {
-            if (team.Driver1 == null || team.Driver2 == null)
+            for(int i=0;i<team.driversList.Length;i++)
             {
-                RacingLogger.Warning($"Warning: Team {team.Name} has null drivers, skipping");
-                continue;
+                if(team.driversList[i] != null)
+                {
+                    team.driversList[i].CalculDayForm();
+                }
             }
-            team.Driver1.CalculDayForm();
-            team.Driver2.CalculDayForm();
         }
 
         for(int tour = 0 ; tour < currentRace.MaxTour;tour++)
         {
             foreach(Team team in info.dictionnaryTeam[division] )
             {
-                if (team.Driver1 == null || team.Driver2 == null)
-                    continue;
-
-                EventExtensions.TriggerEvent(team.Driver1);
-                if(!team.Driver1.raceStat.hasDNF)
-                    team.Driver1.CalculatePointPerTours(currentRace.NbTurn,currentRace.Length,team);
-                EventExtensions.TriggerEvent(team.Driver2);
-                if(!team.Driver2.raceStat.hasDNF)
-                    team.Driver2.CalculatePointPerTours(currentRace.NbTurn,currentRace.Length,team);
+                for(int i=0;i<team.driversList.Length;i++)
+                {
+                    if(team.driversList[i] != null)
+                    {
+                        EventExtensions.TriggerEvent(team.driversList[i]);
+                        if(!team.driversList[i].raceStat.hasDNF)
+                            team.driversList[i].CalculatePointPerTours(currentRace.NbTurn,currentRace.Length,team);
+                    }
+                }
             }
+
                 
         }
         RacingLogger.Info("Recap " + info.dictionnaryTeam[division].Count);
@@ -133,10 +134,9 @@ public class RaceHandler
         RacingLogger.Info(info.driversList.Count.ToString());
         foreach(Team team in info.dictionnaryTeam[division] )
         {
-            if (team.Driver1 != null)
-                info.driversList.Add(team.Driver1);
-            if (team.Driver2 != null)
-                info.driversList.Add(team.Driver2);
+             for(int i=0;i<team.driversList.Length;i++)
+                if(team.driversList[i] != null)  
+                    info.driversList.Add(team.driversList[i]);
         }
         info.driversList.Sort((x,y) =>y.raceStat.racePoints.CompareTo(x.raceStat.racePoints));
         info.dictionnaryTeam[division].Sort((x,y) =>y.GetGeneral().CompareTo(x.GetGeneral()));
@@ -169,10 +169,9 @@ public class RaceHandler
     {
         foreach(Team team in info.teamsList)
         {
-            if (team.Driver1 != null)
-                team.Driver1.ResetRaceVariable();
-            if (team.Driver2 != null)
-                team.Driver2.ResetRaceVariable();
+            for(int i=0;i<team.driversList.Length;i++)
+                if(team.driversList[i] != null) 
+                    team.driversList[i].ResetRaceVariable();
         }
     }
 

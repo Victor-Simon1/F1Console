@@ -66,7 +66,7 @@ public class CarrerHandler
 
         string directory = RacingLibrary.SAVEFILE + "\\"+ input;
         string destinationDB = directory + "/db.sqlite";
-        string sourceFile = RacingLibrary.BASEFILE + "/Database/db.sqlite";
+        string sourceFile = RacingLibrary.BASEFILE + "/Database/default.sqlite";
         string dbFile = "Saves/"+input+"/db.sqlite" ;
 
         Directory.CreateDirectory(directory);
@@ -203,10 +203,13 @@ public class CarrerHandler
             for(int indexTeam = 0; indexTeam < teams.Count; indexTeam++)
             {
                 var team = teams[indexTeam];
-                if (team.Driver1 != null)
-                    info.driversList.Add(team.Driver1);
-                if (team.Driver2 != null)
-                    info.driversList.Add(team.Driver2);
+                for(int i=0;i<team.driversList.Length;i++)
+                {
+                    if(team.driversList[i] != null)
+                    {
+                        info.driversList.Add(team.driversList[i]);
+                    }
+                }
             }
             
             // Afficher le classement des pilotes
@@ -274,10 +277,10 @@ public class CarrerHandler
             for(int indexTeam = 0; indexTeam < teams.Count; indexTeam++)
             {
                 var team = teams[indexTeam];
-                if (team.Driver1 != null)
-                    info.driversList.Add(team.Driver1);
-                if (team.Driver2 != null)
-                    info.driversList.Add(team.Driver2);
+                for(int i = 0;i<team.driversList.Length;i++)
+                    if(team.driversList[i] !=null)
+                        info.driversList.Add(team.driversList[i]);
+
             }
             
             // Afficher les notes des pilotes
@@ -346,18 +349,14 @@ public class CarrerHandler
             for(int indexTeam = 0; indexTeam < teams.Count; indexTeam++)
             {
                 var team = teams[indexTeam];
-                if (team.Driver1 != null)
+                for(int i=0;i<team.driversList.Length;i++)
                 {
-                    team.Driver1.UpdateCarrerStats();
-                    team.Driver1.seasonStat.Reset();
-                    team.Driver1.UpdateStats(); 
-                }
-                if (team.Driver2 != null)
-                {
-                    team.Driver1.UpdateCarrerStats();
-                    team.Driver2.seasonStat.Reset();
-                    team.Driver2.UpdateStats();
-                    
+                    if(team.driversList[i] != null)
+                    {
+                        team.driversList[i].UpdateCarrerStats();
+                        team.driversList[i].seasonStat.Reset();
+                        team.driversList[i].UpdateStats(); 
+                    }
                 }
             }
         }
@@ -397,22 +396,16 @@ public class CarrerHandler
                 continue;
             RacingLogger.Debug($"Update row of team {team.Name}");
             GameManager.instance.database.UpdateRow<Team>(team, "teams");
-            if (team.Driver1 != null)
+            for(int i=0;i<team.driversList.Length;i++)
             {
-                GameManager.instance.database.UpdateRow<Driver>(team.Driver1, "drivers"); 
-                GameManager.instance.database.UpdateAllTimeResult(team.Driver1);
-                GameManager.instance.database.UpdateRowAllTimeSeasonDriverStat(team.Driver1);
-                GameManager.instance.database.UpdateRowCurrentSeasonDriverStat(team.Driver1);
+                if(team.driversList[i] != null)
+                {
+                    GameManager.instance.database.UpdateRow<Driver>(team.driversList[i], "drivers"); 
+                    GameManager.instance.database.UpdateAllTimeResult(team.driversList[i]);
+                    GameManager.instance.database.UpdateRowAllTimeSeasonDriverStat(team.driversList[i]);
+                    GameManager.instance.database.UpdateRowCurrentSeasonDriverStat(team.driversList[i]);
+                }
             }
-                
-            if (team.Driver2 != null)
-            {
-                GameManager.instance.database.UpdateRow<Driver>(team.Driver2, "drivers");
-                GameManager.instance.database.UpdateAllTimeResult(team.Driver2);
-                GameManager.instance.database.UpdateRowAllTimeSeasonDriverStat(team.Driver2);
-                GameManager.instance.database.UpdateRowCurrentSeasonDriverStat(team.Driver2);
-            }
-                
         }
         RacingLogger.Info("Career saved successfully");
     }

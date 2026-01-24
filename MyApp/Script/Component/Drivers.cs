@@ -99,7 +99,7 @@ public class  Driver : Component,IUpdatable,IRaceAble
     public string? LastName {get;set;}
     public string? Birthdate{get;set;}
     public ESexe driverSexe{get;set;}
-
+    public int idTeam;
     //Statistic
     public int potential;
     public int[] driverStats = new int[(int)EDriverStats.MAX];
@@ -130,11 +130,14 @@ public class  Driver : Component,IUpdatable,IRaceAble
         FirstName = reader.GetString(1);
         LastName = reader.GetString(2);
         Birthdate = reader.GetString(3);
+        RacingLogger.Debug("idTeam " + Birthdate);
+        idTeam = reader.GetInt32(4);
+        
         //Stats
-        potential = reader.GetInt32(4);
+        potential = reader.GetInt32(5);
 
         for(int indexStat = 0;indexStat<(int)EDriverStats.MAX;indexStat++)
-            driverStats[indexStat] = reader.GetInt32(indexStat+4);
+            driverStats[indexStat] = reader.GetInt32(indexStat+5);
     }
 
     #endregion

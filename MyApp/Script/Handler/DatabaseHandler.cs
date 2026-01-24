@@ -3,7 +3,8 @@ public class DatabaseHandler
     private enum EDBActions
     {
         MODIFY = 0,
-        CREATE
+        CREATE,
+        MAX
     };
     private enum EDBMode
     {
@@ -201,8 +202,8 @@ public class DatabaseHandler
     public void SelectMode()
     {
         RacingLogger.Info("Select a mode !");
-        RacingLogger.Info("0 : Modify !");
-        RacingLogger.Info("1 : Create !");
+        for(int i = 0; i<(int)EDBActions.MAX;i++)
+            RacingLogger.Info(i + " : " + (EDBActions)i);
         int input = RacingLibrary.GetIntInput();
         switch(input)
         {
@@ -224,13 +225,10 @@ public class DatabaseHandler
         RacingLogger.Info("Enter the name of the new database!");
         
         string dbName = Console.ReadLine();
-        //dbName +=".sqlite";
 
         string destinationDB = RacingLibrary.DBFILE + "\\" + dbName+".sqlite";
-        //string destinationDB = directory + "/db.sqlite";
         string sourceFile = RacingLibrary.DBFILE + "\\" + "db.sqlite";
 
-        /*allfiles = Directory.GetFiles("Database", "db.sqlite", SearchOption.AllDirectories);*/
         if(!File.Exists(sourceFile))
         {
             RacingLogger.Warning("The default database is not here! Please verify if you have not suppress it !");
@@ -246,21 +244,5 @@ public class DatabaseHandler
         for(int i= 0;i<allfiles.Length;i++)
             RacingLogger.Info(i+ " : " + allfiles[i]);
     }
-    private void AddLine()
-    {
-        
-    }
-    private void RemoveLine()
-    {
-        
-    }
 #endregion
-    public void InsertData()
-    {
-        
-    }
-    public void DeleteData()
-    {
-        
-    }
 }

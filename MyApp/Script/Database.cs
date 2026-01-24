@@ -47,12 +47,19 @@ public class Database
                 connection.Open();
                 RacingLogger.Debug("Database open ! ");
                 RacingLogger.Debug(connection.State.ToString());  
-                LoadData<Driver>(info.driversList, connection);
+                
                 LoadData<Chassis>(info.chassisList, connection);
                 LoadData<Motor>(info.motorList, connection);
                 LoadData<Team>(info.teamsList, connection);
                 LoadData<Race>(info.raceList, connection);
-                
+                LoadData<Driver>(info.driversList, connection);
+
+                foreach(Driver driver in info.driversList)
+                {
+                    RacingLogger.Debug("Team id " +driver.idTeam);
+                   Team team =  RacingLibrary.GetTeamById(driver.idTeam,ref info);
+                   team.AddDriver(driver);
+                }
                 LoadSeasonResult(info.driversList,connection);
                 LoadCareerResult(info.driversList,connection);
                 // Initialiser le dictionnaire des équipes par division

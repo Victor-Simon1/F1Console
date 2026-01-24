@@ -37,10 +37,13 @@ public class PointSystem
         List<Driver> drivers = new List<Driver>();
         foreach(Team t in team)
         {
-            if(t.Driver1 != null)
-                drivers.Add(t.Driver1);
-            if(t.Driver2 != null)
-                drivers.Add(t.Driver2);
+            for(int i=0;i<t.driversList.Length;i++)
+            {
+                if(t.driversList[i] != null)
+                {
+                    drivers.Add(t.driversList[i]);
+                }
+            }
         }
         drivers.Sort((x,y) => y.raceStat.racePoints.CompareTo(x.raceStat.racePoints));
         for(int indexPoint = 0;indexPoint < pointArray.Length;indexPoint++)

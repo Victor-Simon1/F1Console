@@ -176,4 +176,15 @@ public static class RacingLibrary
         }
         throw new Exception("Not chassis found");
     }
+    public static Team GetTeamById(int id,ref Info info)
+    {
+        foreach(Team team in info.teamsList)
+        {
+            if(team.Id == id)
+            {
+                return team;
+            }
+        }
+        throw new Exception("Not team found");
+    }
 }

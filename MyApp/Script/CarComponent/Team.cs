@@ -8,18 +8,16 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
     public int Id{get;set;}
     public string? Name{get;set;}
 
-    [JsonIgnore]
     public Motor? Motor{get;set;}
     public int IdMotor{get;set;}
-    [JsonIgnore]
     public Chassis? Chassis {get;set;}
     public int IdChassis{get;set;}
-    [JsonIgnore]
-    public Driver? Driver1 {get;set;}
-    public int IdDriver1{get;set;}
-    [JsonIgnore]
-    public Driver? Driver2 {get;set;}
-    public int IdDriver2{get;set;}
+
+    public Driver[] driversList = new Driver[3];
+    //public Driver? Driver1 {get;set;}
+    //public int IdDriver1{get;set;}
+    //public Driver? Driver2 {get;set;}
+    //public int IdDriver2{get;set;}
     public EDivisionType divison;
 
     public void LoadData(SqliteDataReader reader)
@@ -27,18 +25,33 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
         Id = reader.GetInt32(0);
         Name = reader.GetString(1);
 
-        IdDriver1 = reader.GetInt32(2);
-        IdDriver2 = reader.GetInt32(3);
-        IdChassis = reader.GetInt32(4);
-        IdMotor = reader.GetInt32(5);
+        //IdDriver1 = reader.GetInt32(2);
+        //IdDriver2 = reader.GetInt32(3);
+        IdChassis = reader.GetInt32(2);
+        IdMotor = reader.GetInt32(3);
         
-        divison = (EDivisionType)reader.GetInt32(6);
-        //SetFromId(ref info);
+        divison = (EDivisionType)reader.GetInt32(4);
+    }
+    public void AddDriver(Driver driver)
+    {
+        for(int i=0;i<driversList.Length;i++)
+        {
+            if(driversList[i] == null)
+            {
+                RacingLogger.Debug($"{driver.LastName} a été link avec {Name}");
+                driversList[i] = driver;
+                break;
+            }
+        }
     }
 
+    public void ForEachDriver()
+    {
+        
+    }
     public void SetFromId(ref Info info)
     {
-        try
+       /* try
         {
             Driver1 = RacingLibrary.GetDriverById(IdDriver1, ref info);
         }
@@ -57,7 +70,7 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
             RacingLogger.Exception(ex, $"Warning: Driver2 (ID: {IdDriver2}) not found for team {Name}");
             Driver2 = null;
         }
-
+        */
         try
         {
             Chassis = RacingLibrary.GetChassisById(IdChassis, ref info);
@@ -87,12 +100,16 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
     }
     public int GetSeasonPoint()
     {
-        if(Driver1 == null || Driver2 == null)
+        int seasonPts = 0;
+        for(int i=0;i<driversList.Length;i++)
         {
-             RacingLogger.Error("Drivers are null");
-             return 0;
+            if(driversList[i] != null)
+            {
+                seasonPts += driversList[i].seasonStat.seasonPoint ;
+            }
         }
-        return Driver1.seasonStat.seasonPoint + Driver2.seasonStat.seasonPoint;
+
+        return seasonPts;
     }
 
 
@@ -127,14 +144,13 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
 
     public override string ToString()
     {
-        return Id + " : " + Name +"," + IdChassis + "," + IdMotor + ",Driver " + IdDriver1 + "/"+IdDriver2; 
+        
+        return Id + " : " + Name +"," + IdChassis + "," + IdMotor + ",Driver " ; 
     }
 
     public string UpdateRowString()
     {
-        return  "idPilot1 = " + IdDriver1 +
-                ", idPilot2 = " + IdDriver2 +
-                ", idChassis = " + IdChassis +
+        return  "idChassis = " + IdChassis +
                 ", idMotor = " + IdMotor;
     }
 
