@@ -14,10 +14,7 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
     public int IdChassis{get;set;}
 
     public Driver[] driversList = new Driver[3];
-    //public Driver? Driver1 {get;set;}
-    //public int IdDriver1{get;set;}
-    //public Driver? Driver2 {get;set;}
-    //public int IdDriver2{get;set;}
+
     public EDivisionType divison;
 
     public void LoadData(SqliteDataReader reader)
@@ -25,8 +22,6 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
         Id = reader.GetInt32(0);
         Name = reader.GetString(1);
 
-        //IdDriver1 = reader.GetInt32(2);
-        //IdDriver2 = reader.GetInt32(3);
         IdChassis = reader.GetInt32(2);
         IdMotor = reader.GetInt32(3);
         
@@ -53,26 +48,7 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
     {
         if(Id == 0)
             return;
-       /* try
-        {
-            Driver1 = RacingLibrary.GetDriverById(IdDriver1, ref info);
-        }
-        catch (Exception ex)
-        {
-            RacingLogger.Exception(ex, $"Warning: Driver1 (ID: {IdDriver1}) not found for team {Name}");
-            Driver1 = null;
-        }
 
-        try
-        {
-            Driver2 = RacingLibrary.GetDriverById(IdDriver2, ref info);
-        }
-        catch (Exception ex)
-        {
-            RacingLogger.Exception(ex, $"Warning: Driver2 (ID: {IdDriver2}) not found for team {Name}");
-            Driver2 = null;
-        }
-        */
         try
         {
             Chassis = RacingLibrary.GetChassisById(IdChassis, ref info);
