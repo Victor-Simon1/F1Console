@@ -51,6 +51,8 @@ public class Team : Component,IUpdatable,IRaceAble/*,Saveable*/
     }
     public void SetFromId(ref Info info)
     {
+        if(Id == 0)
+            return;
        /* try
         {
             Driver1 = RacingLibrary.GetDriverById(IdDriver1, ref info);
